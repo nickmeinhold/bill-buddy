@@ -4,15 +4,19 @@
 <dict>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.billbuddy.billBuddy</string>
+	</array>
 	<key>com.apple.security.cs.allow-jit</key>
 	<true/>
 	<key>com.apple.security.network.server</key>
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
-	<key>keychain-access-groups</key>
+	<key>com.apple.developer.applesignin</key>
 	<array>
-		<string>$(AppIdentifierPrefix)com.billbuddy.billBuddy</string>
+		<string>Default</string>
 	</array>
 </dict>
 </plist>

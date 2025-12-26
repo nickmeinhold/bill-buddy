@@ -12,7 +12,20 @@
           "package_name": "com.billbuddy.bill_buddy"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "738041313824-7459iegv8a1e79fuob12lf01etg10hht.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.billbuddy.bill_buddy",
+            "certificate_hash": "87f20b5916c54a08596a30d4a754f6c98a2ca1d8"
+          }
+        },
+        {
+          "client_id": "738041313824-dbba8du58goi2rqa9tb8i5r4shkceahr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBfWTMQ69-zUarpjuIOA-IhkbYrKy1ONXM"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "738041313824-dbba8du58goi2rqa9tb8i5r4shkceahr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "738041313824-je3br815o12i2g1b2hkm78fuqoheqva2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "co.enspyr.bill-buddy"
+              }
+            }
+          ]
         }
       }
     }

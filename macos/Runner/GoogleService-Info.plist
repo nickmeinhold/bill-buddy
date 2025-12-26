@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>738041313824-84thevk9ecgqcbhahaipbsgmnc4ef909.apps.googleusercontent.com</string>
+	<string>738041313824-je3br815o12i2g1b2hkm78fuqoheqva2.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.738041313824-84thevk9ecgqcbhahaipbsgmnc4ef909</string>
+	<string>com.googleusercontent.apps.738041313824-je3br815o12i2g1b2hkm78fuqoheqva2</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>738041313824-7459iegv8a1e79fuob12lf01etg10hht.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>co.enspyr.billBuddy</string>
+	<string>co.enspyr.bill-buddy</string>
 	<key>PROJECT_ID</key>
 	<string>bill-buddy-93c8a</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:738041313824:ios:dbaf28e43291e781b1da45</string>
+	<string>1:738041313824:ios:b4793d7f2f184bb4b1da45</string>
 </dict>
 </plist>

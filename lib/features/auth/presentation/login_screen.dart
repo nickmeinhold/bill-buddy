@@ -1,8 +1,19 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../domain/auth_provider.dart';
+
+/// Check if we should show Apple Sign In (iOS/macOS)
+bool get _showAppleSignIn =>
+    !kIsWeb &&
+    (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS);
+
+/// Check if we should show Google Sign In (Android/Web)
+bool get _showGoogleSignIn =>
+    kIsWeb || defaultTargetPlatform == TargetPlatform.android;
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -52,6 +63,176 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await ref.read(authServiceProvider).signInWithGoogle();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = _getErrorMessage(e);
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _signInWithApple() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await ref.read(authServiceProvider).signInWithApple();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = _getErrorMessage(e);
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _showForgotPasswordDialog() async {
+    final emailController = TextEditingController(text: _emailController.text);
+    final formKey = GlobalKey<FormState>();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        var isLoading = false;
+        String? errorMessage;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Reset Password'),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Enter your email address and we\'ll send you a link to reset your password.',
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        if (!value.contains('@')) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                    ),
+                    if (errorMessage != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        errorMessage!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isLoading ? null : () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          if (!formKey.currentState!.validate()) return;
+
+                          setDialogState(() {
+                            isLoading = true;
+                            errorMessage = null;
+                          });
+
+                          try {
+                            await ref
+                                .read(authServiceProvider)
+                                .sendPasswordResetEmail(emailController.text.trim());
+                            if (context.mounted) {
+                              Navigator.pop(context, true);
+                            }
+                          } catch (e) {
+                            setDialogState(() {
+                              isLoading = false;
+                              errorMessage = _getResetErrorMessage(e);
+                            });
+                          }
+                        },
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Send Reset Link'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    emailController.dispose();
+
+    if (result == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset email sent. Check your inbox.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  String _getResetErrorMessage(Object error) {
+    final errorString = error.toString();
+    if (errorString.contains('user-not-found')) {
+      return 'No account found with this email.';
+    } else if (errorString.contains('invalid-email')) {
+      return 'Invalid email address.';
+    } else if (errorString.contains('too-many-requests')) {
+      return 'Too many attempts. Please try again later.';
+    }
+    return 'Failed to send reset email. Please try again.';
+  }
+
   String _getErrorMessage(Object error) {
     final errorString = error.toString();
     debugPrint('Auth error: $errorString');
@@ -70,8 +251,67 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return 'Network error. Check your connection.';
     } else if (errorString.contains('user-disabled')) {
       return 'This account has been disabled.';
+    } else if (errorString.contains('cancelled') ||
+        errorString.contains('canceled')) {
+      return 'Sign in was cancelled.';
+    } else if (errorString.contains('AuthorizationError error 1000') ||
+        errorString.contains('AuthorizationErrorCode.unknown')) {
+      return 'Apple Sign In is not configured. Please enable it in Apple Developer Portal.';
     }
-    return 'An error occurred. Please try again.';
+    // Show actual error for debugging
+    return 'Error: $errorString';
+  }
+
+  Widget _buildDivider(ThemeData theme) {
+    return Row(
+      children: [
+        Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'or continue with',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+      ],
+    );
+  }
+
+  Widget _buildAppleSignInButton(ThemeData theme) {
+    return OutlinedButton.icon(
+      onPressed: _isLoading ? null : _signInWithApple,
+      style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        side: BorderSide.none,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+      ),
+      icon: const Icon(Icons.apple, size: 24),
+      label: const Text('Sign in with Apple'),
+    );
+  }
+
+  Widget _buildGoogleSignInButton(ThemeData theme) {
+    return OutlinedButton.icon(
+      onPressed: _isLoading ? null : _signInWithGoogle,
+      style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+      ),
+      icon: Image.network(
+        'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg',
+        height: 24,
+        width: 24,
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.g_mobiledata, size: 24),
+      ),
+      label: const Text('Sign in with Google'),
+    );
   }
 
   @override
@@ -179,9 +419,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
-                        // TODO: Implement forgot password
-                      },
+                      onPressed: _showForgotPasswordDialog,
                       child: const Text('Forgot Password?'),
                     ),
                   ),
@@ -210,6 +448,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ],
                   ),
+                  if (_showAppleSignIn || _showGoogleSignIn) ...[
+                    const SizedBox(height: 24),
+                    _buildDivider(theme),
+                    const SizedBox(height: 24),
+                    if (_showAppleSignIn) _buildAppleSignInButton(theme),
+                    if (_showGoogleSignIn) _buildGoogleSignInButton(theme),
+                  ],
                 ],
               ),
             ),

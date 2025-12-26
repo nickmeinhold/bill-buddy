@@ -25,7 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        return ios;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -62,19 +62,14 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCLfDZENYVZHHGtzPQJd1mvoDOdSv1SrvM',
-    appId: '1:738041313824:ios:08fa29227f4355afb1da45',
+    appId: '1:738041313824:ios:dbaf28e43291e781b1da45',
     messagingSenderId: '738041313824',
     projectId: 'bill-buddy-93c8a',
     storageBucket: 'bill-buddy-93c8a.firebasestorage.app',
-    iosBundleId: 'com.billbuddy.billBuddy',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCLfDZENYVZHHGtzPQJd1mvoDOdSv1SrvM',
-    appId: '1:738041313824:ios:b4793d7f2f184bb4b1da45',
-    messagingSenderId: '738041313824',
-    projectId: 'bill-buddy-93c8a',
-    storageBucket: 'bill-buddy-93c8a.firebasestorage.app',
-    iosBundleId: 'co.enspyr.bill-buddy',
+    androidClientId:
+        '738041313824-7459iegv8a1e79fuob12lf01etg10hht.apps.googleusercontent.com',
+    iosClientId:
+        '738041313824-84thevk9ecgqcbhahaipbsgmnc4ef909.apps.googleusercontent.com',
+    iosBundleId: 'co.enspyr.billBuddy',
   );
 }
