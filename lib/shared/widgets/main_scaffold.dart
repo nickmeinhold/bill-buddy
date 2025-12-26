@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +14,7 @@ class MainScaffold extends StatelessWidget {
     if (location.startsWith('/subscriptions')) return 2;
     if (location.startsWith('/budgets')) return 3;
     if (location.startsWith('/bills')) return 4;
+    if (kIsWeb && location.startsWith('/import')) return 5;
     return 0;
   }
 
@@ -33,6 +35,9 @@ class MainScaffold extends StatelessWidget {
       case 4:
         context.go('/bills');
         break;
+      case 5:
+        if (kIsWeb) context.go('/import');
+        break;
     }
   }
 
@@ -43,32 +48,38 @@ class MainScaffold extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _calculateSelectedIndex(context),
         onDestinationSelected: (index) => _onItemTapped(context, index),
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard),
             label: 'Home',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon: Icon(Icons.receipt_long),
             label: 'Transactions',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.subscriptions_outlined),
             selectedIcon: Icon(Icons.subscriptions),
             label: 'Subs',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.pie_chart_outline),
             selectedIcon: Icon(Icons.pie_chart),
             label: 'Budgets',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.event_note_outlined),
             selectedIcon: Icon(Icons.event_note),
             label: 'Bills',
           ),
+          if (kIsWeb)
+            const NavigationDestination(
+              icon: Icon(Icons.upload_file_outlined),
+              selectedIcon: Icon(Icons.upload_file),
+              label: 'Import',
+            ),
         ],
       ),
     );

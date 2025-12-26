@@ -9,6 +9,7 @@ class TransactionModel extends Equatable {
   final String category;
   final bool isSubscription;
   final String? notes;
+  final String? statementId;
 
   const TransactionModel({
     required this.id,
@@ -19,6 +20,7 @@ class TransactionModel extends Equatable {
     required this.category,
     this.isSubscription = false,
     this.notes,
+    this.statementId,
   });
 
   bool get isExpense => amount < 0;
@@ -35,6 +37,7 @@ class TransactionModel extends Equatable {
       category: map['category'] as String,
       isSubscription: map['isSubscription'] as bool? ?? false,
       notes: map['notes'] as String?,
+      statementId: map['statementId'] as String?,
     );
   }
 
@@ -47,6 +50,7 @@ class TransactionModel extends Equatable {
       'category': category,
       'isSubscription': isSubscription,
       'notes': notes,
+      'statementId': statementId,
     };
   }
 
@@ -59,6 +63,7 @@ class TransactionModel extends Equatable {
     String? category,
     bool? isSubscription,
     String? notes,
+    String? statementId,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -69,6 +74,7 @@ class TransactionModel extends Equatable {
       category: category ?? this.category,
       isSubscription: isSubscription ?? this.isSubscription,
       notes: notes ?? this.notes,
+      statementId: statementId ?? this.statementId,
     );
   }
 
@@ -82,5 +88,6 @@ class TransactionModel extends Equatable {
         category,
         isSubscription,
         notes,
+        statementId,
       ];
 }

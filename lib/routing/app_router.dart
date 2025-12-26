@@ -8,6 +8,7 @@ import '../features/subscriptions/presentation/subscriptions_screen.dart';
 import '../features/budgets/presentation/budgets_screen.dart';
 import '../features/bills/presentation/bills_screen.dart';
 import '../features/transactions/presentation/transactions_screen.dart';
+import '../features/statements/presentation/statements_screen.dart';
 import '../shared/widgets/main_scaffold.dart';
 import '../features/auth/domain/auth_provider.dart';
 
@@ -62,6 +63,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/bills',
             builder: (context, state) => const BillsScreen(),
+          ),
+          GoRoute(
+            path: '/import',
+            builder: (context, state) => const StatementsScreen(),
           ),
         ],
       ),
