@@ -56,19 +56,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       // Unlock encryption with password
       if (credential.user != null) {
-        try {
-          await ref.read(encryptionProvider.notifier).unlockForUser(
-                credential.user!.uid,
-                _passwordController.text,
-              );
-        } catch (e) {
-          // If encryption not set up yet (legacy user), initialize it
-          debugPrint('Encryption unlock failed, initializing: $e');
-          await ref.read(encryptionProvider.notifier).initializeForNewUser(
-                credential.user!.uid,
-                _passwordController.text,
-              );
-        }
+        await ref.read(encryptionProvider.notifier).unlockForUser(
+              credential.user!.uid,
+              _passwordController.text,
+            );
       }
     } catch (e) {
       setState(() {

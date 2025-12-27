@@ -197,19 +197,9 @@ class EncryptionService {
   }
 
   /// Decrypt a double value
-  /// Returns the decrypted amount, or parses directly if not encrypted
-  double decryptAmount(dynamic encryptedAmount, Uint8List dek) {
-    if (encryptedAmount is num) {
-      return encryptedAmount.toDouble(); // Legacy unencrypted data
-    }
-    if (encryptedAmount is String) {
-      if (isEncrypted(encryptedAmount)) {
-        final decrypted = decryptField(encryptedAmount, dek);
-        return double.parse(decrypted);
-      }
-      return double.parse(encryptedAmount); // Unencrypted string number
-    }
-    throw ArgumentError('Invalid amount type: ${encryptedAmount.runtimeType}');
+  double decryptAmount(String encryptedAmount, Uint8List dek) {
+    final decrypted = decryptField(encryptedAmount, dek);
+    return double.parse(decrypted);
   }
 
   /// Check if a field is encrypted (starts with marker)

@@ -29,22 +29,20 @@ final billsProvider = StreamProvider.autoDispose<List<BillModel>>((ref) {
       .map((snapshot) => snapshot.docs.map((doc) {
             final data = Map<String, dynamic>.from(doc.data());
 
-            // Decrypt fields if encrypted
-            if (data['_encrypted'] == true) {
-              data['name'] = encryptionService.decryptField(
-                data['name'] as String,
+            // Decrypt sensitive fields
+            data['name'] = encryptionService.decryptField(
+              data['name'] as String,
+              dek,
+            );
+            data['amount'] = encryptionService.decryptAmount(
+              data['amount'] as String,
+              dek,
+            );
+            if (data['notes'] != null) {
+              data['notes'] = encryptionService.decryptField(
+                data['notes'] as String,
                 dek,
               );
-              data['amount'] = encryptionService.decryptAmount(
-                data['amount'],
-                dek,
-              );
-              if (data['notes'] != null) {
-                data['notes'] = encryptionService.decryptField(
-                  data['notes'] as String,
-                  dek,
-                );
-              }
             }
 
             return BillModel.fromMap(data, doc.id);
