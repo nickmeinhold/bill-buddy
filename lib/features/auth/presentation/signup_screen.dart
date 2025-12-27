@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/encryption/encryption_provider.dart';
+import '../../../routing/app_router.dart';
 import '../domain/auth_provider.dart';
-import 'recovery_codes_screen.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -43,14 +43,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     });
 
     try {
+      debugPrint('DEBUG: Starting signup...');
       final credential =
           await ref.read(authServiceProvider).createUserWithEmailAndPassword(
                 email: _emailController.text.trim(),
                 password: _passwordController.text,
               );
+      debugPrint('DEBUG: User created: ${credential.user?.uid}');
 
       // Create user profile in Firestore
       if (credential.user != null) {
+        debugPrint('DEBUG: Writing Firestore profile...');
         await FirebaseFirestore.instance
             .collection('users')
             .doc(credential.user!.uid)
@@ -59,34 +62,36 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           'displayName': _nameController.text.trim(),
           'createdAt': DateTime.now().toIso8601String(),
         });
+        debugPrint('DEBUG: Firestore profile written');
 
         // Update display name
+        debugPrint('DEBUG: Updating display name...');
         await credential.user!.updateDisplayName(_nameController.text.trim());
+        debugPrint('DEBUG: Display name updated');
 
         // Initialize encryption and get recovery codes
+        debugPrint('DEBUG: Initializing encryption...');
         final recoveryCodes = await ref
             .read(encryptionProvider.notifier)
             .initializeForNewUser(
               credential.user!.uid,
               _passwordController.text,
             );
+        debugPrint('DEBUG: Got ${recoveryCodes.length} recovery codes');
 
-        // Show recovery codes screen
+        // Store codes and navigate to recovery codes screen
         if (mounted) {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => RecoveryCodesScreen(
-                recoveryCodes: recoveryCodes,
-                onAcknowledged: () {
-                  Navigator.of(context).pop();
-                  context.go('/');
-                },
-              ),
-            ),
-          );
+          debugPrint('DEBUG: Setting pending recovery codes');
+          ref.read(pendingRecoveryCodesProvider.notifier).state = recoveryCodes;
+          debugPrint('DEBUG: Navigating to /recovery-codes');
+          context.go('/recovery-codes');
+        } else {
+          debugPrint('DEBUG: Widget not mounted!');
         }
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('DEBUG: Signup error: $e');
+      debugPrint('DEBUG: Stack trace: $stack');
       final errorString = e.toString();
       if (errorString.contains('email-already-in-use')) {
         _showAccountExistsDialog();

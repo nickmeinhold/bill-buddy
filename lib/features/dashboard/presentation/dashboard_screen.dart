@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/encryption/encryption_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/budget_model.dart';
 import '../../../shared/models/transaction_model.dart';
@@ -27,7 +28,10 @@ class DashboardScreen extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => ref.read(authServiceProvider).signOut(),
+            onPressed: () {
+              ref.read(encryptionProvider.notifier).lock();
+              ref.read(authServiceProvider).signOut();
+            },
           ),
         ],
       ),

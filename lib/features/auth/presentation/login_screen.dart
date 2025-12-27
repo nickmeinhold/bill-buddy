@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/encryption/encryption_provider.dart';
+import '../../../routing/app_router.dart';
 import '../domain/auth_provider.dart';
 import 'encryption_passphrase_dialog.dart';
-import 'recovery_codes_screen.dart';
 
 /// Check if we should show Apple Sign In (iOS/macOS)
 bool get _showAppleSignIn =>
@@ -127,17 +127,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .initializeForNewUser(userId, passphrase);
 
       if (mounted) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => RecoveryCodesScreen(
-              recoveryCodes: recoveryCodes,
-              onAcknowledged: () {
-                Navigator.of(context).pop();
-                context.go('/');
-              },
-            ),
-          ),
-        );
+        ref.read(pendingRecoveryCodesProvider.notifier).state = recoveryCodes;
+        context.go('/recovery-codes');
       }
     } else {
       // Existing user - prompt for passphrase

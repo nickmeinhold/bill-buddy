@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/subscriptions/domain/subscriptions_provider.dart';
@@ -71,14 +72,19 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
     String userId,
     String password,
   ) async {
+    debugPrint('ENCRYPTION: initializeForNewUser for $userId');
+    try {
     // Generate new DEK
     final dek = _encryptionService.generateDEK();
+    debugPrint('ENCRYPTION: Generated DEK');
 
     // Wrap DEK with password
     final wrappedDEK = _encryptionService.wrapDEK(dek, password);
+    debugPrint('ENCRYPTION: Wrapped DEK');
 
     // Generate recovery codes
     final recoveryCodes = _encryptionService.generateRecoveryCodes();
+    debugPrint('ENCRYPTION: Generated ${recoveryCodes.length} recovery codes');
 
     // Hash recovery codes for storage
     final hashedCodes = recoveryCodes.map((code) => {
@@ -91,8 +97,10 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
       dek,
       recoveryCodes.first,
     );
+    debugPrint('ENCRYPTION: Wrapped DEK with recovery code');
 
     // Store in Firestore
+    debugPrint('ENCRYPTION: Writing to Firestore...');
     await _firestore.collection('users').doc(userId).set({
       'encryption': {
         'wrappedDEK': wrappedDEK,
@@ -102,6 +110,7 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
         'recoveryCodes': hashedCodes,
       },
     }, SetOptions(merge: true));
+    debugPrint('ENCRYPTION: Firestore write complete');
 
     // Update state
     state = state.copyWith(
@@ -110,22 +119,37 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
       hasEncryption: true,
       requiresPassphrase: false,
     );
+    debugPrint('ENCRYPTION: State updated, returning codes');
 
     return recoveryCodes;
+    } catch (e, stack) {
+      debugPrint('ENCRYPTION: Error in initializeForNewUser: $e');
+      debugPrint('ENCRYPTION: Stack: $stack');
+      rethrow;
+    }
   }
 
   /// Check if user has encryption set up
   Future<bool> checkEncryptionStatus(String userId) async {
-    final doc = await _firestore.collection('users').doc(userId).get();
-    final data = doc.data();
-    final hasEncryption = data?['encryption']?['wrappedDEK'] != null;
+    debugPrint('ENCRYPTION: checkEncryptionStatus for $userId');
+    try {
+      final doc = await _firestore.collection('users').doc(userId).get();
+      debugPrint('ENCRYPTION: Got doc, exists=${doc.exists}');
+      final data = doc.data();
+      final hasEncryption = data?['encryption']?['wrappedDEK'] != null;
+      debugPrint('ENCRYPTION: hasEncryption=$hasEncryption');
 
-    state = state.copyWith(
-      isInitialized: true,
-      hasEncryption: hasEncryption,
-    );
+      state = state.copyWith(
+        isInitialized: true,
+        hasEncryption: hasEncryption,
+      );
 
-    return hasEncryption;
+      return hasEncryption;
+    } catch (e, stack) {
+      debugPrint('ENCRYPTION: Error in checkEncryptionStatus: $e');
+      debugPrint('ENCRYPTION: Stack: $stack');
+      rethrow;
+    }
   }
 
   /// Unlock encryption for existing user during login

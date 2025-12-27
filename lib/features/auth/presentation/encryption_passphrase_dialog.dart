@@ -54,12 +54,13 @@ class _EncryptionPassphraseDialogState
       title: Text(
         widget.isNewUser ? 'Set Encryption Passphrase' : 'Enter Passphrase',
       ),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             if (widget.isNewUser) ...[
               Container(
                 padding: const EdgeInsets.all(12),
@@ -157,6 +158,7 @@ class _EncryptionPassphraseDialogState
               ),
             ],
           ],
+        ),
         ),
       ),
       actions: [
