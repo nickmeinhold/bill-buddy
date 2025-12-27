@@ -10,6 +10,7 @@ Bill Buddy is a personal finance app (similar to Rocket Money) built with Flutte
 
 ### Recently Completed
 
+- **Test suite & CI/CD**: Unit tests for encryption and models, GitHub Actions for PR testing and tagged deploys
 - **Client-side encryption**: Wrapped key encryption (AES-256-GCM) for all financial data. Only users can decrypt their own data - not even Firebase/Google can read it.
 - **Encryption auth flow**: Full flow working for both email/password and social auth (Google Sign-In):
   - New users: Set passphrase → see recovery codes → dashboard
@@ -46,11 +47,42 @@ flutter clean && flutter pub get
 # Run tests
 flutter test
 
+# Run tests with coverage
+flutter test --coverage
+
 # Build release
 flutter build apk
 flutter build ios
 flutter build macos
 ```
+
+## Development Setup
+
+### Pre-commit Hooks
+
+The project uses git hooks to ensure code quality before commits. After cloning, run:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The pre-commit hook runs on staged Dart files:
+1. `dart format --set-exit-if-changed` - checks formatting
+2. `flutter analyze --fatal-infos` - runs linter with infos as errors
+
+### CI/CD
+
+**Pull Requests** (`.github/workflows/test.yml`):
+- Runs `flutter analyze --fatal-infos`
+- Checks formatting with `dart format --set-exit-if-changed`
+- Runs all tests with coverage
+- Enforces minimum 30% code coverage via [very_good_coverage](https://github.com/VeryGoodOpenSource/very_good_coverage)
+
+**Tagged Releases** (`.github/workflows/deploy.yml`):
+- Triggered by tags matching `v*.*.*`
+- Builds and deploys web to Firebase Hosting
+- Builds Android APK and attaches to GitHub release
+- Builds iOS (unsigned) and uploads as artifact
 
 ## Architecture
 

@@ -53,6 +53,12 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      - name: Check coverage threshold
+        uses: VeryGoodOpenSource/very_good_coverage@v3
+        with:
+          path: coverage/lcov.info
+          min_coverage: 30
+
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
