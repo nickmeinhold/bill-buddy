@@ -44,11 +44,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
     try {
       debugPrint('DEBUG: Starting signup...');
-      final credential =
-          await ref.read(authServiceProvider).createUserWithEmailAndPassword(
-                email: _emailController.text.trim(),
-                password: _passwordController.text,
-              );
+      final credential = await ref
+          .read(authServiceProvider)
+          .createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
       debugPrint('DEBUG: User created: ${credential.user?.uid}');
 
       // Create user profile in Firestore
@@ -58,10 +59,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             .collection('users')
             .doc(credential.user!.uid)
             .set({
-          'email': _emailController.text.trim(),
-          'displayName': _nameController.text.trim(),
-          'createdAt': DateTime.now().toIso8601String(),
-        });
+              'email': _emailController.text.trim(),
+              'displayName': _nameController.text.trim(),
+              'createdAt': DateTime.now().toIso8601String(),
+            });
         debugPrint('DEBUG: Firestore profile written');
 
         // Update display name

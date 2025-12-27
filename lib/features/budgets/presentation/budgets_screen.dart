@@ -18,12 +18,10 @@ class BudgetsScreen extends ConsumerWidget {
     final currentMonth = DateFormat('MMMM yyyy').format(DateTime.now());
 
     return budgetsAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        body: Center(child: Text('Error: $error')),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, stack) =>
+          Scaffold(body: Center(child: Text('Error: $error'))),
       data: (budgets) {
         final totalBudget = budgets.fold<double>(0, (sum, b) => sum + b.limit);
         final totalSpent = budgets.fold<double>(0, (sum, b) => sum + b.spent);
@@ -85,26 +83,32 @@ class BudgetsScreen extends ConsumerWidget {
                                 children: [
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           currentMonth,
-                                          style: theme.textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
                                           '\$${totalSpent.toStringAsFixed(0)}',
-                                          style: theme.textTheme.headlineMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: theme.textTheme.headlineMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                         ),
                                         Text(
                                           'of \$${totalBudget.toStringAsFixed(0)} budget',
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                            color: theme.colorScheme.onSurfaceVariant,
-                                          ),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -124,8 +128,12 @@ class BudgetsScreen extends ConsumerWidget {
                                             showTitle: false,
                                           ),
                                           PieChartSectionData(
-                                            value: remaining > 0 ? remaining : 0,
-                                            color: theme.colorScheme.surfaceContainerHighest,
+                                            value: remaining > 0
+                                                ? remaining
+                                                : 0,
+                                            color: theme
+                                                .colorScheme
+                                                .surfaceContainerHighest,
                                             radius: 20,
                                             showTitle: false,
                                           ),
@@ -137,12 +145,14 @@ class BudgetsScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 16),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   _buildStatItem(
                                     context,
                                     label: 'Remaining',
-                                    value: '\$${remaining.abs().toStringAsFixed(0)}',
+                                    value:
+                                        '\$${remaining.abs().toStringAsFixed(0)}',
                                     color: remaining >= 0
                                         ? AppTheme.incomeColor
                                         : AppTheme.expenseColor,
@@ -156,7 +166,8 @@ class BudgetsScreen extends ConsumerWidget {
                                   _buildStatItem(
                                     context,
                                     label: 'Over Budget',
-                                    value: '${budgets.where((b) => b.isOverBudget).length}',
+                                    value:
+                                        '${budgets.where((b) => b.isOverBudget).length}',
                                     color: AppTheme.expenseColor,
                                   ),
                                 ],
@@ -174,10 +185,12 @@ class BudgetsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 12),
                       // Budget items
-                      ...budgets.map((budget) => _BudgetCard(
-                            budget: budget,
-                            onTap: () => _showBudgetForm(context, budget),
-                          )),
+                      ...budgets.map(
+                        (budget) => _BudgetCard(
+                          budget: budget,
+                          onTap: () => _showBudgetForm(context, budget),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -188,9 +201,7 @@ class BudgetsScreen extends ConsumerWidget {
 
   void _showBudgetForm(BuildContext context, [BudgetModel? budget]) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => BudgetFormScreen(budget: budget),
-      ),
+      MaterialPageRoute(builder: (context) => BudgetFormScreen(budget: budget)),
     );
   }
 
@@ -233,8 +244,8 @@ class _BudgetCard extends StatelessWidget {
     final color = budget.isOverBudget
         ? AppTheme.expenseColor
         : budget.isNearLimit
-            ? AppTheme.warningColor
-            : theme.colorScheme.primary;
+        ? AppTheme.warningColor
+        : theme.colorScheme.primary;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -257,7 +268,10 @@ class _BudgetCard extends StatelessWidget {
                   ),
                   if (budget.isOverBudget)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.expenseColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -299,9 +313,7 @@ class _BudgetCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '\$${budget.remaining.abs().toStringAsFixed(0)} ${budget.isOverBudget ? 'over' : 'remaining'}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: color,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(color: color),
               ),
             ],
           ),

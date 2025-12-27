@@ -16,19 +16,21 @@ class BillsScreen extends ConsumerWidget {
     final billsAsync = ref.watch(billsProvider);
 
     return billsAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        body: Center(child: Text('Error: $error')),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, stack) =>
+          Scaffold(body: Center(child: Text('Error: $error'))),
       data: (bills) {
         final overdueBills = bills.where((b) => b.isOverdue).toList();
-        final upcomingBills = bills.where((b) => !b.isOverdue && !b.isPaid).toList()
-          ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+        final upcomingBills =
+            bills.where((b) => !b.isOverdue && !b.isPaid).toList()
+              ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
         final paidBills = bills.where((b) => b.isPaid).toList();
 
-        final totalDue = upcomingBills.fold<double>(0, (sum, b) => sum + b.amount);
+        final totalDue = upcomingBills.fold<double>(
+          0,
+          (sum, b) => sum + b.amount,
+        );
 
         return Scaffold(
           appBar: AppBar(
@@ -88,22 +90,27 @@ class BillsScreen extends ConsumerWidget {
                                   children: [
                                     Text(
                                       'Upcoming Bills',
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
                                       '\$${totalDue.toStringAsFixed(2)}',
-                                      style: theme.textTheme.headlineMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: theme.textTheme.headlineMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                     ),
                                     Text(
                                       '${upcomingBills.length} bills upcoming',
-                                      style: theme.textTheme.bodyMedium?.copyWith(
-                                        color: theme.colorScheme.onSurfaceVariant,
-                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -111,7 +118,9 @@ class BillsScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.billColor.withValues(alpha: 0.1),
+                                  color: AppTheme.billColor.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -145,11 +154,13 @@ class BillsScreen extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        ...overdueBills.map((bill) => _BillCard(
-                              bill: bill,
-                              onTap: () => _showBillForm(context, bill),
-                              onTogglePaid: () => _togglePaid(ref, bill),
-                            )),
+                        ...overdueBills.map(
+                          (bill) => _BillCard(
+                            bill: bill,
+                            onTap: () => _showBillForm(context, bill),
+                            onTogglePaid: () => _togglePaid(ref, bill),
+                          ),
+                        ),
                       ],
                       // Upcoming section
                       if (upcomingBills.isNotEmpty) ...[
@@ -161,11 +172,13 @@ class BillsScreen extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...upcomingBills.map((bill) => _BillCard(
-                              bill: bill,
-                              onTap: () => _showBillForm(context, bill),
-                              onTogglePaid: () => _togglePaid(ref, bill),
-                            )),
+                        ...upcomingBills.map(
+                          (bill) => _BillCard(
+                            bill: bill,
+                            onTap: () => _showBillForm(context, bill),
+                            onTogglePaid: () => _togglePaid(ref, bill),
+                          ),
+                        ),
                       ],
                       // Paid section
                       if (paidBills.isNotEmpty) ...[
@@ -178,11 +191,13 @@ class BillsScreen extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...paidBills.map((bill) => _BillCard(
-                              bill: bill,
-                              onTap: () => _showBillForm(context, bill),
-                              onTogglePaid: () => _togglePaid(ref, bill),
-                            )),
+                        ...paidBills.map(
+                          (bill) => _BillCard(
+                            bill: bill,
+                            onTap: () => _showBillForm(context, bill),
+                            onTogglePaid: () => _togglePaid(ref, bill),
+                          ),
+                        ),
                       ],
                     ],
                   ),
@@ -193,11 +208,9 @@ class BillsScreen extends ConsumerWidget {
   }
 
   void _showBillForm(BuildContext context, [BillModel? bill]) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => BillFormScreen(bill: bill),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => BillFormScreen(bill: bill)));
   }
 
   void _togglePaid(WidgetRef ref, BillModel bill) {
@@ -264,9 +277,7 @@ class _BillCard extends StatelessWidget {
           children: [
             Text(
               statusText,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: statusColor,
-              ),
+              style: theme.textTheme.bodySmall?.copyWith(color: statusColor),
             ),
             if (bill.category != null) ...[
               Text(

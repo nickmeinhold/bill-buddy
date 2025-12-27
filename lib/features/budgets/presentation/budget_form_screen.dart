@@ -73,9 +73,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -87,7 +87,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Budget'),
-        content: Text('Are you sure you want to delete the "$_category" budget?'),
+        content: Text(
+          'Are you sure you want to delete the "$_category" budget?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -110,9 +112,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -124,7 +126,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Reset Spent Amount'),
-        content: const Text('This will reset the spent amount to \$0. Continue?'),
+        content: const Text(
+          'This will reset the spent amount to \$0. Continue?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -167,8 +171,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
               items: AppConstants.defaultCategories
                   .where((cat) => cat != 'Income')
                   .map((cat) {
-                return DropdownMenuItem(value: cat, child: Text(cat));
-              }).toList(),
+                    return DropdownMenuItem(value: cat, child: Text(cat));
+                  })
+                  .toList(),
               onChanged: (value) {
                 if (value != null) setState(() => _category = value);
               },
@@ -181,8 +186,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                 prefixText: '\$ ',
                 hintText: 'e.g., 500',
               ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a budget limit';
@@ -201,7 +207,8 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                 return DropdownMenuItem(
                   value: period,
                   child: Text(
-                      period.name[0].toUpperCase() + period.name.substring(1)),
+                    period.name[0].toUpperCase() + period.name.substring(1),
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -219,8 +226,9 @@ class _BudgetFormScreenState extends ConsumerState<BudgetFormScreen> {
                         labelText: 'Amount Spent',
                         prefixText: '\$ ',
                       ),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Required';

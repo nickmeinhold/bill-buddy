@@ -109,14 +109,14 @@ class BillModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        name,
-        amount,
-        dueDate,
-        frequency,
-        isPaid,
-        remindDaysBefore,
-        category,
-        notes,
-      ];
+    id,
+    name,
+    amount,
+    dueDate,
+    frequency,
+    isPaid,
+    remindDaysBefore,
+    category,
+    notes,
+  ];
 }

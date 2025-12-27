@@ -17,24 +17,32 @@ import '../shared/widgets/main_scaffold.dart';
 import '../features/auth/domain/auth_provider.dart';
 
 /// Holds recovery codes temporarily for passing to the recovery codes screen
-final pendingRecoveryCodesProvider = StateProvider<List<String>?>((ref) => null);
+final pendingRecoveryCodesProvider = StateProvider<List<String>?>(
+  (ref) => null,
+);
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
   final pendingCodes = ref.watch(pendingRecoveryCodesProvider);
   // Only watch isUnlocked to avoid rebuilds on every encryption state change
-  final isEncryptionUnlocked = ref.watch(encryptionProvider.select((s) => s.isUnlocked));
+  final isEncryptionUnlocked = ref.watch(
+    encryptionProvider.select((s) => s.isUnlocked),
+  );
 
   return GoRouter(
     initialLocation: '/login',
     redirect: (context, state) {
       final isLoggedIn = authState.valueOrNull != null;
       final isAuthRoute =
-          state.matchedLocation == '/login' || state.matchedLocation == '/signup';
+          state.matchedLocation == '/login' ||
+          state.matchedLocation == '/signup';
       final isRecoveryCodesRoute = state.matchedLocation == '/recovery-codes';
-      final isEncryptionSetupRoute = state.matchedLocation == '/encryption-setup';
+      final isEncryptionSetupRoute =
+          state.matchedLocation == '/encryption-setup';
 
-      debugPrint('ROUTER: location=${state.matchedLocation}, isLoggedIn=$isLoggedIn, pendingCodes=${pendingCodes?.length}, encryptionUnlocked=$isEncryptionUnlocked');
+      debugPrint(
+        'ROUTER: location=${state.matchedLocation}, isLoggedIn=$isLoggedIn, pendingCodes=${pendingCodes?.length}, encryptionUnlocked=$isEncryptionUnlocked',
+      );
 
       // Don't redirect away from recovery codes screen
       if (isRecoveryCodesRoute) {
@@ -62,7 +70,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (isLoggedIn && isAuthRoute) {
         // User just logged in - always go to encryption setup first
         // The encryption setup screen will check status and redirect appropriately
-        debugPrint('ROUTER: Logged in on auth route, redirecting to encryption-setup');
+        debugPrint(
+          'ROUTER: Logged in on auth route, redirecting to encryption-setup',
+        );
         return '/encryption-setup';
       }
 
@@ -70,10 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/signup',
         builder: (context, state) => const SignupScreen(),

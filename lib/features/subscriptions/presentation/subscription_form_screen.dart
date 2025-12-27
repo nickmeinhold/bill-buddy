@@ -97,9 +97,9 @@ class _SubscriptionFormScreenState
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -111,7 +111,9 @@ class _SubscriptionFormScreenState
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Subscription'),
-        content: Text('Are you sure you want to delete "${_nameController.text}"?'),
+        content: Text(
+          'Are you sure you want to delete "${_nameController.text}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -136,9 +138,9 @@ class _SubscriptionFormScreenState
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -186,8 +188,9 @@ class _SubscriptionFormScreenState
                 labelText: 'Amount',
                 prefixText: '\$ ',
               ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter an amount';
@@ -205,7 +208,9 @@ class _SubscriptionFormScreenState
               items: SubscriptionFrequency.values.map((freq) {
                 return DropdownMenuItem(
                   value: freq,
-                  child: Text(freq.name[0].toUpperCase() + freq.name.substring(1)),
+                  child: Text(
+                    freq.name[0].toUpperCase() + freq.name.substring(1),
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -242,8 +247,9 @@ class _SubscriptionFormScreenState
                 items: SubscriptionStatus.values.map((status) {
                   return DropdownMenuItem(
                     value: status,
-                    child:
-                        Text(status.name[0].toUpperCase() + status.name.substring(1)),
+                    child: Text(
+                      status.name[0].toUpperCase() + status.name.substring(1),
+                    ),
                   );
                 }).toList(),
                 onChanged: (value) {

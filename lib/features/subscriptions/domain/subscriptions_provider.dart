@@ -14,44 +14,46 @@ final firestoreProvider = Provider<FirebaseFirestore>((ref) {
 
 final subscriptionsProvider =
     StreamProvider.autoDispose<List<SubscriptionModel>>((ref) {
-  final user = ref.watch(authStateProvider).valueOrNull;
-  final encryptionState = ref.watch(encryptionProvider);
+      final user = ref.watch(authStateProvider).valueOrNull;
+      final encryptionState = ref.watch(encryptionProvider);
 
-  // Wait for both auth and encryption to be ready
-  if (user == null || !encryptionState.isUnlocked) return Stream.value([]);
+      // Wait for both auth and encryption to be ready
+      if (user == null || !encryptionState.isUnlocked) return Stream.value([]);
 
-  final firestore = ref.watch(firestoreProvider);
-  final encryptionService = ref.watch(encryptionServiceProvider);
-  final dek = encryptionState.dek!;
+      final firestore = ref.watch(firestoreProvider);
+      final encryptionService = ref.watch(encryptionServiceProvider);
+      final dek = encryptionState.dek!;
 
-  return firestore
-      .collection('users')
-      .doc(user.uid)
-      .collection('subscriptions')
-      .orderBy('nextBillingDate')
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) {
-            final data = Map<String, dynamic>.from(doc.data());
+      return firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('subscriptions')
+          .orderBy('nextBillingDate')
+          .snapshots()
+          .map(
+            (snapshot) => snapshot.docs.map((doc) {
+              final data = Map<String, dynamic>.from(doc.data());
 
-            // Decrypt sensitive fields
-            data['name'] = encryptionService.decryptField(
-              data['name'] as String,
-              dek,
-            );
-            data['amount'] = encryptionService.decryptAmount(
-              data['amount'] as String,
-              dek,
-            );
-            if (data['notes'] != null) {
-              data['notes'] = encryptionService.decryptField(
-                data['notes'] as String,
+              // Decrypt sensitive fields
+              data['name'] = encryptionService.decryptField(
+                data['name'] as String,
                 dek,
               );
-            }
+              data['amount'] = encryptionService.decryptAmount(
+                data['amount'] as String,
+                dek,
+              );
+              if (data['notes'] != null) {
+                data['notes'] = encryptionService.decryptField(
+                  data['notes'] as String,
+                  dek,
+                );
+              }
 
-            return SubscriptionModel.fromMap(data, doc.id);
-          }).toList());
-});
+              return SubscriptionModel.fromMap(data, doc.id);
+            }).toList(),
+          );
+    });
 
 final subscriptionServiceProvider = Provider<SubscriptionService>((ref) {
   final user = ref.watch(authStateProvider).valueOrNull;

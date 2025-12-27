@@ -73,7 +73,9 @@ class _EncryptionSetupScreenState extends ConsumerState<EncryptionSetupScreen> {
         _needsSetup = !hasEncryption;
       });
 
-      debugPrint('ENCRYPTION_SETUP: Prompting for passphrase, isNewUser=${!hasEncryption}');
+      debugPrint(
+        'ENCRYPTION_SETUP: Prompting for passphrase, isNewUser=${!hasEncryption}',
+      );
       if (hasEncryption) {
         // Existing user - prompt for passphrase
         await _promptForPassphrase(user.uid, isNewUser: false);
@@ -91,14 +93,18 @@ class _EncryptionSetupScreenState extends ConsumerState<EncryptionSetupScreen> {
     }
   }
 
-  Future<void> _promptForPassphrase(String userId,
-      {required bool isNewUser}) async {
+  Future<void> _promptForPassphrase(
+    String userId, {
+    required bool isNewUser,
+  }) async {
     debugPrint('ENCRYPTION_SETUP: Showing passphrase dialog...');
     final passphrase = await EncryptionPassphraseDialog.show(
       context,
       isNewUser: isNewUser,
     );
-    debugPrint('ENCRYPTION_SETUP: Dialog returned, passphrase=${passphrase != null ? "provided" : "null"}');
+    debugPrint(
+      'ENCRYPTION_SETUP: Dialog returned, passphrase=${passphrase != null ? "provided" : "null"}',
+    );
 
     if (passphrase == null) {
       debugPrint('ENCRYPTION_SETUP: User cancelled, signing out');

@@ -96,9 +96,9 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -110,7 +110,9 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Bill'),
-        content: Text('Are you sure you want to delete "${_nameController.text}"?'),
+        content: Text(
+          'Are you sure you want to delete "${_nameController.text}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -133,9 +135,9 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -200,8 +202,9 @@ class _BillFormScreenState extends ConsumerState<BillFormScreen> {
                 labelText: 'Amount',
                 prefixText: '\$ ',
               ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter an amount';

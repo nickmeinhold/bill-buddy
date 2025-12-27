@@ -49,17 +49,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      final credential = await ref.read(authServiceProvider).signInWithEmailAndPassword(
+      final credential = await ref
+          .read(authServiceProvider)
+          .signInWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
 
       // Unlock encryption with password
       if (credential.user != null) {
-        await ref.read(encryptionProvider.notifier).unlockForUser(
-              credential.user!.uid,
-              _passwordController.text,
-            );
+        await ref
+            .read(encryptionProvider.notifier)
+            .unlockForUser(credential.user!.uid, _passwordController.text);
       }
     } catch (e) {
       setState(() {
@@ -104,8 +105,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   /// Handle encryption setup/unlock for social auth users
   Future<void> _handleSocialAuthEncryption(String userId) async {
     // Check if user has encryption set up
-    final hasEncryption =
-        await ref.read(encryptionProvider.notifier).checkEncryptionStatus(userId);
+    final hasEncryption = await ref
+        .read(encryptionProvider.notifier)
+        .checkEncryptionStatus(userId);
 
     if (!hasEncryption) {
       // New user - prompt to set passphrase
@@ -244,7 +246,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: isLoading ? null : () => Navigator.pop(context, false),
+                  onPressed: isLoading
+                      ? null
+                      : () => Navigator.pop(context, false),
                   child: const Text('Cancel'),
                 ),
                 FilledButton(
@@ -261,7 +265,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           try {
                             await ref
                                 .read(authServiceProvider)
-                                .sendPasswordResetEmail(emailController.text.trim());
+                                .sendPasswordResetEmail(
+                                  emailController.text.trim(),
+                                );
                             if (context.mounted) {
                               Navigator.pop(context, true);
                             }

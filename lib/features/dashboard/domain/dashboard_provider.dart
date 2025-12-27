@@ -29,7 +29,9 @@ class DashboardData {
       monthlyBudget > 0 ? (monthlySpending / monthlyBudget).clamp(0, 1) : 0;
 }
 
-final dashboardDataProvider = Provider.autoDispose<AsyncValue<DashboardData>>((ref) {
+final dashboardDataProvider = Provider.autoDispose<AsyncValue<DashboardData>>((
+  ref,
+) {
   final subscriptionsAsync = ref.watch(subscriptionsProvider);
   final billsAsync = ref.watch(billsProvider);
   final budgetsAsync = ref.watch(budgetsProvider);
@@ -46,7 +48,9 @@ final dashboardDataProvider = Provider.autoDispose<AsyncValue<DashboardData>>((r
   // If any have errors, show first error
   if (subscriptionsAsync.hasError) {
     return AsyncValue.error(
-        subscriptionsAsync.error!, subscriptionsAsync.stackTrace!);
+      subscriptionsAsync.error!,
+      subscriptionsAsync.stackTrace!,
+    );
   }
   if (billsAsync.hasError) {
     return AsyncValue.error(billsAsync.error!, billsAsync.stackTrace!);
@@ -56,7 +60,9 @@ final dashboardDataProvider = Provider.autoDispose<AsyncValue<DashboardData>>((r
   }
   if (transactionsAsync.hasError) {
     return AsyncValue.error(
-        transactionsAsync.error!, transactionsAsync.stackTrace!);
+      transactionsAsync.error!,
+      transactionsAsync.stackTrace!,
+    );
   }
 
   final subscriptions = subscriptionsAsync.value ?? [];
@@ -78,16 +84,20 @@ final dashboardDataProvider = Provider.autoDispose<AsyncValue<DashboardData>>((r
   final activeSubscriptions = subscriptions
       .where((s) => s.status == SubscriptionStatus.active)
       .toList();
-  final monthlySubscriptionCost =
-      activeSubscriptions.fold<double>(0, (sum, s) => sum + s.monthlyAmount);
+  final monthlySubscriptionCost = activeSubscriptions.fold<double>(
+    0,
+    (sum, s) => sum + s.monthlyAmount,
+  );
 
   // Bills due this week
   final endOfWeek = now.add(const Duration(days: 7));
   final billsDueThisWeek = bills
-      .where((b) =>
-          !b.isPaid &&
-          b.dueDate.isAfter(now.subtract(const Duration(days: 1))) &&
-          b.dueDate.isBefore(endOfWeek))
+      .where(
+        (b) =>
+            !b.isPaid &&
+            b.dueDate.isAfter(now.subtract(const Duration(days: 1))) &&
+            b.dueDate.isBefore(endOfWeek),
+      )
       .length;
 
   // Recent transactions (last 5)
@@ -98,13 +108,15 @@ final dashboardDataProvider = Provider.autoDispose<AsyncValue<DashboardData>>((r
     ..sort((a, b) => b.percentUsed.compareTo(a.percentUsed));
   final topBudgets = sortedBudgets.take(3).toList();
 
-  return AsyncValue.data(DashboardData(
-    monthlySpending: monthlyExpenses,
-    monthlyBudget: totalBudget,
-    activeSubscriptionCount: activeSubscriptions.length,
-    monthlySubscriptionCost: monthlySubscriptionCost,
-    billsDueThisWeek: billsDueThisWeek,
-    recentTransactions: recentTransactions,
-    topBudgets: topBudgets,
-  ));
+  return AsyncValue.data(
+    DashboardData(
+      monthlySpending: monthlyExpenses,
+      monthlyBudget: totalBudget,
+      activeSubscriptionCount: activeSubscriptions.length,
+      monthlySubscriptionCost: monthlySubscriptionCost,
+      billsDueThisWeek: billsDueThisWeek,
+      recentTransactions: recentTransactions,
+      topBudgets: topBudgets,
+    ),
+  );
 });

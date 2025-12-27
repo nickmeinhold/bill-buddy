@@ -22,9 +22,7 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
     final statementsAsync = ref.watch(statementsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Import Statements'),
-      ),
+      appBar: AppBar(title: const Text('Import Statements')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isUploading ? null : _pickAndUploadFile,
         icon: _isUploading
@@ -102,9 +100,9 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
       final file = result.files.first;
       if (file.bytes == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not read file')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Could not read file')));
         }
         return;
       }
@@ -126,9 +124,9 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
       }
     } finally {
       if (mounted) {
@@ -163,15 +161,15 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
         final service = ref.read(statementServiceProvider);
         await service.deleteStatement(statement);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Statement deleted')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Statement deleted')));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Delete failed: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Delete failed: $e')));
         }
       }
     }
@@ -182,10 +180,7 @@ class _StatementCard extends StatelessWidget {
   final StatementModel statement;
   final VoidCallback onDelete;
 
-  const _StatementCard({
-    required this.statement,
-    required this.onDelete,
-  });
+  const _StatementCard({required this.statement, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +191,9 @@ class _StatementCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: _getStatusColor(statement.status).withValues(alpha: 0.1),
+          backgroundColor: _getStatusColor(
+            statement.status,
+          ).withValues(alpha: 0.1),
           child: Icon(
             _getStatusIcon(statement.status),
             color: _getStatusColor(statement.status),
@@ -260,10 +257,7 @@ class _StatementCard extends StatelessWidget {
               child: SizedBox(
                 width: 12,
                 height: 12,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: color,
-                ),
+                child: CircularProgressIndicator(strokeWidth: 2, color: color),
               ),
             ),
           Flexible(

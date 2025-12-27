@@ -6,10 +6,7 @@ class EncryptionPassphraseDialog extends StatefulWidget {
   /// an existing user entering their passphrase (false)
   final bool isNewUser;
 
-  const EncryptionPassphraseDialog({
-    super.key,
-    required this.isNewUser,
-  });
+  const EncryptionPassphraseDialog({super.key, required this.isNewUser});
 
   /// Shows the dialog and returns the passphrase if submitted, null if cancelled
   static Future<String?> show(BuildContext context, {required bool isNewUser}) {
@@ -61,104 +58,104 @@ class _EncryptionPassphraseDialogState
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            if (widget.isNewUser) ...[
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.security,
-                      color: theme.colorScheme.onPrimaryContainer,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'This passphrase encrypts your financial data. It is separate from your social login.',
-                        style: TextStyle(
-                          color: theme.colorScheme.onPrimaryContainer,
-                          fontSize: 12,
+              if (widget.isNewUser) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.security,
+                        color: theme.colorScheme.onPrimaryContainer,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'This passphrase encrypts your financial data. It is separate from your social login.',
+                          style: TextStyle(
+                            color: theme.colorScheme.onPrimaryContainer,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-            ] else ...[
-              Text(
-                'Enter your encryption passphrase to access your data.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-            TextFormField(
-              controller: _passphraseController,
-              obscureText: _obscurePassphrase,
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: 'Passphrase',
-                prefixIcon: const Icon(Icons.lock_outlined),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassphrase
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
+                    ],
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassphrase = !_obscurePassphrase;
-                    });
-                  },
                 ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a passphrase';
-                }
-                if (widget.isNewUser && value.length < 8) {
-                  return 'Passphrase must be at least 8 characters';
-                }
-                return null;
-              },
-            ),
-            if (widget.isNewUser) ...[
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+              ] else ...[
+                Text(
+                  'Enter your encryption passphrase to access your data.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               TextFormField(
-                controller: _confirmController,
-                obscureText: _obscureConfirm,
+                controller: _passphraseController,
+                obscureText: _obscurePassphrase,
+                autofocus: true,
                 decoration: InputDecoration(
-                  labelText: 'Confirm Passphrase',
+                  labelText: 'Passphrase',
                   prefixIcon: const Icon(Icons.lock_outlined),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureConfirm
+                      _obscurePassphrase
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
                     ),
                     onPressed: () {
                       setState(() {
-                        _obscureConfirm = !_obscureConfirm;
+                        _obscurePassphrase = !_obscurePassphrase;
                       });
                     },
                   ),
                 ),
                 validator: (value) {
-                  if (value != _passphraseController.text) {
-                    return 'Passphrases do not match';
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a passphrase';
+                  }
+                  if (widget.isNewUser && value.length < 8) {
+                    return 'Passphrase must be at least 8 characters';
                   }
                   return null;
                 },
               ),
+              if (widget.isNewUser) ...[
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _confirmController,
+                  obscureText: _obscureConfirm,
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Passphrase',
+                    prefixIcon: const Icon(Icons.lock_outlined),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscureConfirm
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirm = !_obscureConfirm;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value != _passphraseController.text) {
+                      return 'Passphrases do not match';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ],
-          ],
-        ),
+          ),
         ),
       ),
       actions: [

@@ -190,7 +190,10 @@ void main() {
           category: 'Entertainment',
         );
 
-        final updated = original.copyWith(amount: 19.99, name: 'Netflix Premium');
+        final updated = original.copyWith(
+          amount: 19.99,
+          name: 'Netflix Premium',
+        );
 
         expect(updated.amount, equals(19.99));
         expect(updated.name, equals('Netflix Premium'));

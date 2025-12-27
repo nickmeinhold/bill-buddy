@@ -66,8 +66,8 @@ class DashboardScreen extends ConsumerWidget {
                   color: data.spendingProgress >= 1
                       ? AppTheme.expenseColor
                       : data.spendingProgress >= 0.8
-                          ? AppTheme.warningColor
-                          : AppTheme.expenseColor,
+                      ? AppTheme.warningColor
+                      : AppTheme.expenseColor,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -77,7 +77,8 @@ class DashboardScreen extends ConsumerWidget {
                         context,
                         title: 'Subscriptions',
                         value: '${data.activeSubscriptionCount}',
-                        subtitle: '\$${data.monthlySubscriptionCost.toStringAsFixed(0)}/mo',
+                        subtitle:
+                            '\$${data.monthlySubscriptionCost.toStringAsFixed(0)}/mo',
                         icon: Icons.subscriptions,
                         color: AppTheme.subscriptionColor,
                       ),
@@ -231,10 +232,7 @@ class DashboardScreen extends ConsumerWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Text(
-              title,
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text(title, style: theme.textTheme.bodyMedium),
             Text(
               subtitle,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -283,8 +281,8 @@ class _TransactionItem extends StatelessWidget {
           transaction.isSubscription
               ? Icons.subscriptions
               : isExpense
-                  ? Icons.arrow_downward
-                  : Icons.arrow_upward,
+              ? Icons.arrow_downward
+              : Icons.arrow_upward,
           color: isExpense ? AppTheme.expenseColor : AppTheme.incomeColor,
         ),
       ),
@@ -330,8 +328,8 @@ class _BudgetItem extends StatelessWidget {
     final color = progress >= 1
         ? AppTheme.expenseColor
         : progress >= 0.8
-            ? AppTheme.warningColor
-            : theme.colorScheme.primary;
+        ? AppTheme.warningColor
+        : theme.colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),

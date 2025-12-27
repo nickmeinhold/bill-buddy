@@ -20,12 +20,7 @@ class TransactionsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transactions'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-        ],
+        actions: [IconButton(icon: const Icon(Icons.search), onPressed: () {})],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showTransactionForm(context),
@@ -46,7 +41,8 @@ class TransactionsScreen extends ConsumerWidget {
                     label: Text(_filterLabel(filter)),
                     selected: isSelected,
                     onSelected: (selected) {
-                      ref.read(transactionFilterProvider.notifier).state = filter;
+                      ref.read(transactionFilterProvider.notifier).state =
+                          filter;
                     },
                   ),
                 );
@@ -123,7 +119,10 @@ class TransactionsScreen extends ConsumerWidget {
     }
   }
 
-  void _showTransactionForm(BuildContext context, [TransactionModel? transaction]) {
+  void _showTransactionForm(
+    BuildContext context, [
+    TransactionModel? transaction,
+  ]) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => TransactionFormScreen(transaction: transaction),
@@ -159,8 +158,8 @@ class _TransactionCard extends StatelessWidget {
             transaction.isSubscription
                 ? Icons.subscriptions
                 : isExpense
-                    ? Icons.arrow_downward
-                    : Icons.arrow_upward,
+                ? Icons.arrow_downward
+                : Icons.arrow_upward,
             color: isExpense ? AppTheme.expenseColor : AppTheme.incomeColor,
           ),
         ),

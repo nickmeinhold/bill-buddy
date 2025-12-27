@@ -97,8 +97,11 @@ class EncryptionService {
 
     // Extract components
     final salt = Uint8List.sublistView(combined, 0, _saltLength);
-    final iv =
-        Uint8List.sublistView(combined, _saltLength, _saltLength + _ivLength);
+    final iv = Uint8List.sublistView(
+      combined,
+      _saltLength,
+      _saltLength + _ivLength,
+    );
     final cipherText = Uint8List.sublistView(combined, _saltLength + _ivLength);
 
     // Derive KEK from password
@@ -108,12 +111,7 @@ class EncryptionService {
     final cipher = GCMBlockCipher(AESEngine())
       ..init(
         false, // decrypt
-        AEADParameters(
-          KeyParameter(kek),
-          _tagLength * 8,
-          iv,
-          Uint8List(0),
-        ),
+        AEADParameters(KeyParameter(kek), _tagLength * 8, iv, Uint8List(0)),
       );
 
     final dek = Uint8List(cipherText.length - _tagLength);
@@ -124,7 +122,11 @@ class EncryptionService {
   }
 
   /// Re-wrap DEK with new password (for password changes)
-  String rewrapDEK(String oldWrappedDEK, String oldPassword, String newPassword) {
+  String rewrapDEK(
+    String oldWrappedDEK,
+    String oldPassword,
+    String newPassword,
+  ) {
     final dek = unwrapDEK(oldWrappedDEK, oldPassword);
     return wrapDEK(dek, newPassword);
   }
@@ -138,17 +140,17 @@ class EncryptionService {
     final cipher = GCMBlockCipher(AESEngine())
       ..init(
         true,
-        AEADParameters(
-          KeyParameter(dek),
-          _tagLength * 8,
-          iv,
-          Uint8List(0),
-        ),
+        AEADParameters(KeyParameter(dek), _tagLength * 8, iv, Uint8List(0)),
       );
 
     final cipherText = Uint8List(plaintextBytes.length + _tagLength);
     final len = cipher.processBytes(
-        plaintextBytes, 0, plaintextBytes.length, cipherText, 0);
+      plaintextBytes,
+      0,
+      plaintextBytes.length,
+      cipherText,
+      0,
+    );
     cipher.doFinal(cipherText, len);
 
     // Combine: iv + cipherText (includes auth tag)
@@ -175,17 +177,17 @@ class EncryptionService {
     final cipher = GCMBlockCipher(AESEngine())
       ..init(
         false,
-        AEADParameters(
-          KeyParameter(dek),
-          _tagLength * 8,
-          iv,
-          Uint8List(0),
-        ),
+        AEADParameters(KeyParameter(dek), _tagLength * 8, iv, Uint8List(0)),
       );
 
     final plaintext = Uint8List(encryptedData.length - _tagLength);
-    final len =
-        cipher.processBytes(encryptedData, 0, encryptedData.length, plaintext, 0);
+    final len = cipher.processBytes(
+      encryptedData,
+      0,
+      encryptedData.length,
+      plaintext,
+      0,
+    );
     cipher.doFinal(plaintext, len);
 
     return utf8.decode(plaintext);

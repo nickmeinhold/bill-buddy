@@ -73,12 +73,12 @@ class StatementModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        fileName,
-        uploadedAt,
-        status,
-        transactionCount,
-        errorMessage,
-        storagePath,
-      ];
+    id,
+    fileName,
+    uploadedAt,
+    status,
+    transactionCount,
+    errorMessage,
+    storagePath,
+  ];
 }

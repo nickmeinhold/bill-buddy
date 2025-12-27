@@ -106,15 +106,18 @@ void main() {
       );
     });
 
-    test('produces different wrapped output each time (due to random salt/IV)', () {
-      final dek = encryptionService.generateDEK();
-      const password = 'password';
+    test(
+      'produces different wrapped output each time (due to random salt/IV)',
+      () {
+        final dek = encryptionService.generateDEK();
+        const password = 'password';
 
-      final wrapped1 = encryptionService.wrapDEK(dek, password);
-      final wrapped2 = encryptionService.wrapDEK(dek, password);
+        final wrapped1 = encryptionService.wrapDEK(dek, password);
+        final wrapped2 = encryptionService.wrapDEK(dek, password);
 
-      expect(wrapped1, isNot(equals(wrapped2)));
-    });
+        expect(wrapped1, isNot(equals(wrapped2)));
+      },
+    );
   });
 
   group('DEK Rewrapping', () {
@@ -124,8 +127,11 @@ void main() {
       const newPassword = 'newPassword';
 
       final wrapped = encryptionService.wrapDEK(dek, oldPassword);
-      final rewrapped =
-          encryptionService.rewrapDEK(wrapped, oldPassword, newPassword);
+      final rewrapped = encryptionService.rewrapDEK(
+        wrapped,
+        oldPassword,
+        newPassword,
+      );
 
       final unwrapped = encryptionService.unwrapDEK(rewrapped, newPassword);
       expect(unwrapped, equals(dek));
@@ -137,8 +143,11 @@ void main() {
       const newPassword = 'newPassword';
 
       final wrapped = encryptionService.wrapDEK(dek, oldPassword);
-      final rewrapped =
-          encryptionService.rewrapDEK(wrapped, oldPassword, newPassword);
+      final rewrapped = encryptionService.rewrapDEK(
+        wrapped,
+        oldPassword,
+        newPassword,
+      );
 
       expect(
         () => encryptionService.unwrapDEK(rewrapped, oldPassword),
@@ -275,7 +284,11 @@ void main() {
       final format = RegExp(r'^[A-Z2-9]{4}-[A-Z2-9]{4}$');
 
       for (final code in codes) {
-        expect(format.hasMatch(code), isTrue, reason: 'Code "$code" is invalid');
+        expect(
+          format.hasMatch(code),
+          isTrue,
+          reason: 'Code "$code" is invalid',
+        );
       }
     });
 
@@ -361,10 +374,14 @@ void main() {
       final dek = encryptionService.generateDEK();
       const recoveryCode = 'ABCD-EFGH';
 
-      final wrapped =
-          encryptionService.wrapDEKWithRecoveryCode(dek, recoveryCode);
-      final unwrapped =
-          encryptionService.unwrapDEKWithRecoveryCode(wrapped, recoveryCode);
+      final wrapped = encryptionService.wrapDEKWithRecoveryCode(
+        dek,
+        recoveryCode,
+      );
+      final unwrapped = encryptionService.unwrapDEKWithRecoveryCode(
+        wrapped,
+        recoveryCode,
+      );
 
       expect(unwrapped, equals(dek));
     });
@@ -372,21 +389,28 @@ void main() {
     test('recovery code wrapping is case insensitive', () {
       final dek = encryptionService.generateDEK();
 
-      final wrapped =
-          encryptionService.wrapDEKWithRecoveryCode(dek, 'ABCD-EFGH');
-      final unwrapped =
-          encryptionService.unwrapDEKWithRecoveryCode(wrapped, 'abcd-efgh');
+      final wrapped = encryptionService.wrapDEKWithRecoveryCode(
+        dek,
+        'ABCD-EFGH',
+      );
+      final unwrapped = encryptionService.unwrapDEKWithRecoveryCode(
+        wrapped,
+        'abcd-efgh',
+      );
 
       expect(unwrapped, equals(dek));
     });
 
     test('wrong recovery code fails to unwrap', () {
       final dek = encryptionService.generateDEK();
-      final wrapped =
-          encryptionService.wrapDEKWithRecoveryCode(dek, 'ABCD-EFGH');
+      final wrapped = encryptionService.wrapDEKWithRecoveryCode(
+        dek,
+        'ABCD-EFGH',
+      );
 
       expect(
-        () => encryptionService.unwrapDEKWithRecoveryCode(wrapped, 'WRONG-CODE'),
+        () =>
+            encryptionService.unwrapDEKWithRecoveryCode(wrapped, 'WRONG-CODE'),
         throwsA(isA<Exception>()),
       );
     });

@@ -16,9 +16,11 @@ final budgetsProvider = StreamProvider.autoDispose<List<BudgetModel>>((ref) {
       .collection('budgets')
       .orderBy('category')
       .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => BudgetModel.fromMap(doc.data(), doc.id))
-          .toList());
+      .map(
+        (snapshot) => snapshot.docs
+            .map((doc) => BudgetModel.fromMap(doc.data(), doc.id))
+            .toList(),
+      );
 });
 
 final budgetServiceProvider = Provider<BudgetService>((ref) {

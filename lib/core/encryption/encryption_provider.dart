@@ -52,7 +52,12 @@ class EncryptionState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [dek, isInitialized, hasEncryption, requiresPassphrase];
+  List<Object?> get props => [
+    dek,
+    isInitialized,
+    hasEncryption,
+    requiresPassphrase,
+  ];
 }
 
 /// Notifier for managing encryption state
@@ -61,7 +66,7 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
   final EncryptionService _encryptionService;
 
   EncryptionNotifier(this._firestore, this._encryptionService)
-      : super(const EncryptionState());
+    : super(const EncryptionState());
 
   /// Initialize DEK for a new user during signup
   /// Generates DEK, wraps it with password-derived KEK, stores in Firestore
@@ -72,54 +77,60 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
   ) async {
     debugPrint('ENCRYPTION: initializeForNewUser for $userId');
     try {
-    // Generate new DEK
-    final dek = _encryptionService.generateDEK();
-    debugPrint('ENCRYPTION: Generated DEK');
+      // Generate new DEK
+      final dek = _encryptionService.generateDEK();
+      debugPrint('ENCRYPTION: Generated DEK');
 
-    // Wrap DEK with password
-    final wrappedDEK = _encryptionService.wrapDEK(dek, password);
-    debugPrint('ENCRYPTION: Wrapped DEK');
+      // Wrap DEK with password
+      final wrappedDEK = _encryptionService.wrapDEK(dek, password);
+      debugPrint('ENCRYPTION: Wrapped DEK');
 
-    // Generate recovery codes
-    final recoveryCodes = _encryptionService.generateRecoveryCodes();
-    debugPrint('ENCRYPTION: Generated ${recoveryCodes.length} recovery codes');
+      // Generate recovery codes
+      final recoveryCodes = _encryptionService.generateRecoveryCodes();
+      debugPrint(
+        'ENCRYPTION: Generated ${recoveryCodes.length} recovery codes',
+      );
 
-    // Hash recovery codes for storage
-    final hashedCodes = recoveryCodes.map((code) => {
-          'hash': _encryptionService.hashRecoveryCode(code),
-          'used': false,
-        }).toList();
+      // Hash recovery codes for storage
+      final hashedCodes = recoveryCodes
+          .map(
+            (code) => {
+              'hash': _encryptionService.hashRecoveryCode(code),
+              'used': false,
+            },
+          )
+          .toList();
 
-    // Also wrap DEK with first recovery code for recovery purposes
-    final recoveryWrappedDEK = _encryptionService.wrapDEKWithRecoveryCode(
-      dek,
-      recoveryCodes.first,
-    );
-    debugPrint('ENCRYPTION: Wrapped DEK with recovery code');
+      // Also wrap DEK with first recovery code for recovery purposes
+      final recoveryWrappedDEK = _encryptionService.wrapDEKWithRecoveryCode(
+        dek,
+        recoveryCodes.first,
+      );
+      debugPrint('ENCRYPTION: Wrapped DEK with recovery code');
 
-    // Store in Firestore
-    debugPrint('ENCRYPTION: Writing to Firestore...');
-    await _firestore.collection('users').doc(userId).set({
-      'encryption': {
-        'wrappedDEK': wrappedDEK,
-        'recoveryWrappedDEK': recoveryWrappedDEK,
-        'version': 1,
-        'createdAt': DateTime.now().toIso8601String(),
-        'recoveryCodes': hashedCodes,
-      },
-    }, SetOptions(merge: true));
-    debugPrint('ENCRYPTION: Firestore write complete');
+      // Store in Firestore
+      debugPrint('ENCRYPTION: Writing to Firestore...');
+      await _firestore.collection('users').doc(userId).set({
+        'encryption': {
+          'wrappedDEK': wrappedDEK,
+          'recoveryWrappedDEK': recoveryWrappedDEK,
+          'version': 1,
+          'createdAt': DateTime.now().toIso8601String(),
+          'recoveryCodes': hashedCodes,
+        },
+      }, SetOptions(merge: true));
+      debugPrint('ENCRYPTION: Firestore write complete');
 
-    // Update state
-    state = state.copyWith(
-      dek: dek,
-      isInitialized: true,
-      hasEncryption: true,
-      requiresPassphrase: false,
-    );
-    debugPrint('ENCRYPTION: State updated, returning codes');
+      // Update state
+      state = state.copyWith(
+        dek: dek,
+        isInitialized: true,
+        hasEncryption: true,
+        requiresPassphrase: false,
+      );
+      debugPrint('ENCRYPTION: State updated, returning codes');
 
-    return recoveryCodes;
+      return recoveryCodes;
     } catch (e, stack) {
       debugPrint('ENCRYPTION: Error in initializeForNewUser: $e');
       debugPrint('ENCRYPTION: Stack: $stack');
@@ -137,10 +148,7 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
       final hasEncryption = data?['encryption']?['wrappedDEK'] != null;
       debugPrint('ENCRYPTION: hasEncryption=$hasEncryption');
 
-      state = state.copyWith(
-        isInitialized: true,
-        hasEncryption: hasEncryption,
-      );
+      state = state.copyWith(isInitialized: true, hasEncryption: hasEncryption);
 
       return hasEncryption;
     } catch (e, stack) {
@@ -200,7 +208,9 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
     }
 
     final recoveryCodes =
-        (data['encryption']['recoveryCodes'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        (data['encryption']['recoveryCodes'] as List?)
+            ?.cast<Map<String, dynamic>>() ??
+        [];
 
     // Find matching unused recovery code
     int? matchingIndex;
@@ -208,18 +218,23 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
       final codeData = recoveryCodes[i];
       if (codeData['used'] == false &&
           _encryptionService.verifyRecoveryCode(
-              recoveryCode, codeData['hash'] as String)) {
+            recoveryCode,
+            codeData['hash'] as String,
+          )) {
         matchingIndex = i;
         break;
       }
     }
 
     if (matchingIndex == null) {
-      throw InvalidRecoveryCodeException('Invalid or already used recovery code');
+      throw InvalidRecoveryCodeException(
+        'Invalid or already used recovery code',
+      );
     }
 
     // Unwrap DEK with recovery code
-    final recoveryWrappedDEK = data['encryption']['recoveryWrappedDEK'] as String?;
+    final recoveryWrappedDEK =
+        data['encryption']['recoveryWrappedDEK'] as String?;
     if (recoveryWrappedDEK == null) {
       throw EncryptionNotInitializedException('No recovery backup found');
     }
@@ -243,11 +258,7 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
     });
 
     // Update state
-    state = state.copyWith(
-      dek: dek,
-      isInitialized: true,
-      hasEncryption: true,
-    );
+    state = state.copyWith(dek: dek, isInitialized: true, hasEncryption: true);
   }
 
   /// Change password - re-wrap DEK with new password
@@ -283,10 +294,10 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
 /// Main encryption state provider
 final encryptionProvider =
     StateNotifierProvider<EncryptionNotifier, EncryptionState>((ref) {
-  final firestore = ref.watch(firestoreProvider);
-  final encryptionService = ref.watch(encryptionServiceProvider);
-  return EncryptionNotifier(firestore, encryptionService);
-});
+      final firestore = ref.watch(firestoreProvider);
+      final encryptionService = ref.watch(encryptionServiceProvider);
+      return EncryptionNotifier(firestore, encryptionService);
+    });
 
 /// Convenience provider for getting DEK (throws if not unlocked)
 final dekProvider = Provider<Uint8List>((ref) {

@@ -96,9 +96,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -111,7 +111,8 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       builder: (context) => AlertDialog(
         title: const Text('Delete Transaction'),
         content: Text(
-            'Are you sure you want to delete "${_merchantController.text}"?'),
+          'Are you sure you want to delete "${_merchantController.text}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -136,9 +137,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -189,7 +190,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               controller: _merchantController,
               decoration: InputDecoration(
                 labelText: _isExpense ? 'Merchant / Description' : 'Source',
-                hintText: _isExpense ? 'e.g., Amazon, Starbucks' : 'e.g., Salary, Freelance',
+                hintText: _isExpense
+                    ? 'e.g., Amazon, Starbucks'
+                    : 'e.g., Salary, Freelance',
               ),
               textCapitalization: TextCapitalization.words,
               validator: (value) {
@@ -206,8 +209,9 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
                 labelText: 'Amount',
                 prefixText: '\$ ',
               ),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter an amount';

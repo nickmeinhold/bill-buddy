@@ -10,9 +10,7 @@ extension PumpApp on WidgetTester {
     await pumpWidget(
       ProviderScope(
         overrides: overrides,
-        child: MaterialApp(
-          home: widget,
-        ),
+        child: MaterialApp(home: widget),
       ),
     );
   }
@@ -24,9 +22,7 @@ extension PumpApp on WidgetTester {
     await pumpWidget(
       ProviderScope(
         overrides: overrides,
-        child: MaterialApp(
-          home: Scaffold(body: widget),
-        ),
+        child: MaterialApp(home: Scaffold(body: widget)),
       ),
     );
   }

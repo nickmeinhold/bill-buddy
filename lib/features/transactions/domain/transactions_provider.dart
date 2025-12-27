@@ -9,25 +9,26 @@ import '../../../shared/models/transaction_model.dart';
 import '../../auth/domain/auth_provider.dart';
 import '../../subscriptions/domain/subscriptions_provider.dart';
 
-final transactionsProvider =
-    StreamProvider.autoDispose<List<TransactionModel>>((ref) {
-  final user = ref.watch(authStateProvider).valueOrNull;
-  final encryptionState = ref.watch(encryptionProvider);
+final transactionsProvider = StreamProvider.autoDispose<List<TransactionModel>>(
+  (ref) {
+    final user = ref.watch(authStateProvider).valueOrNull;
+    final encryptionState = ref.watch(encryptionProvider);
 
-  // Wait for both auth and encryption to be ready
-  if (user == null || !encryptionState.isUnlocked) return Stream.value([]);
+    // Wait for both auth and encryption to be ready
+    if (user == null || !encryptionState.isUnlocked) return Stream.value([]);
 
-  final firestore = ref.watch(firestoreProvider);
-  final encryptionService = ref.watch(encryptionServiceProvider);
-  final dek = encryptionState.dek!;
+    final firestore = ref.watch(firestoreProvider);
+    final encryptionService = ref.watch(encryptionServiceProvider);
+    final dek = encryptionState.dek!;
 
-  return firestore
-      .collection('users')
-      .doc(user.uid)
-      .collection('transactions')
-      .orderBy('date', descending: true)
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) {
+    return firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('transactions')
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs.map((doc) {
             final data = Map<String, dynamic>.from(doc.data());
 
             // Decrypt sensitive fields
@@ -47,32 +48,35 @@ final transactionsProvider =
             }
 
             return TransactionModel.fromMap(data, doc.id);
-          }).toList());
-});
+          }).toList(),
+        );
+  },
+);
 
 enum TransactionFilter { all, income, expenses, subscriptions }
 
-final transactionFilterProvider =
-    StateProvider<TransactionFilter>((ref) => TransactionFilter.all);
+final transactionFilterProvider = StateProvider<TransactionFilter>(
+  (ref) => TransactionFilter.all,
+);
 
 final filteredTransactionsProvider =
     Provider.autoDispose<AsyncValue<List<TransactionModel>>>((ref) {
-  final transactionsAsync = ref.watch(transactionsProvider);
-  final filter = ref.watch(transactionFilterProvider);
+      final transactionsAsync = ref.watch(transactionsProvider);
+      final filter = ref.watch(transactionFilterProvider);
 
-  return transactionsAsync.whenData((transactions) {
-    switch (filter) {
-      case TransactionFilter.all:
-        return transactions;
-      case TransactionFilter.income:
-        return transactions.where((t) => t.isIncome).toList();
-      case TransactionFilter.expenses:
-        return transactions.where((t) => t.isExpense).toList();
-      case TransactionFilter.subscriptions:
-        return transactions.where((t) => t.isSubscription).toList();
-    }
-  });
-});
+      return transactionsAsync.whenData((transactions) {
+        switch (filter) {
+          case TransactionFilter.all:
+            return transactions;
+          case TransactionFilter.income:
+            return transactions.where((t) => t.isIncome).toList();
+          case TransactionFilter.expenses:
+            return transactions.where((t) => t.isExpense).toList();
+          case TransactionFilter.subscriptions:
+            return transactions.where((t) => t.isSubscription).toList();
+        }
+      });
+    });
 
 final transactionServiceProvider = Provider<TransactionService>((ref) {
   final user = ref.watch(authStateProvider).valueOrNull;

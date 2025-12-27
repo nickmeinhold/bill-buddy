@@ -12,8 +12,9 @@ final storageProvider = Provider<FirebaseStorage>((ref) {
   return FirebaseStorage.instance;
 });
 
-final statementsProvider =
-    StreamProvider.autoDispose<List<StatementModel>>((ref) {
+final statementsProvider = StreamProvider.autoDispose<List<StatementModel>>((
+  ref,
+) {
   final user = ref.watch(authStateProvider).valueOrNull;
   if (user == null) return Stream.value([]);
 
@@ -24,9 +25,11 @@ final statementsProvider =
       .collection('statements')
       .orderBy('uploadedAt', descending: true)
       .snapshots()
-      .map((snapshot) => snapshot.docs
-          .map((doc) => StatementModel.fromMap(doc.data(), doc.id))
-          .toList());
+      .map(
+        (snapshot) => snapshot.docs
+            .map((doc) => StatementModel.fromMap(doc.data(), doc.id))
+            .toList(),
+      );
 });
 
 final statementServiceProvider = Provider<StatementService>((ref) {
@@ -45,10 +48,7 @@ class StatementService {
 
   CollectionReference<Map<String, dynamic>>? get _collection {
     if (_userId == null) return null;
-    return _firestore
-        .collection('users')
-        .doc(_userId)
-        .collection('statements');
+    return _firestore.collection('users').doc(_userId).collection('statements');
   }
 
   Reference? get _storageRef {
