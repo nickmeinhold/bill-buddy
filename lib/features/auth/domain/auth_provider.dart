@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -56,7 +57,20 @@ class AuthService {
 
   /// Sign in with Google (for Android/Web)
   Future<UserCredential> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (kIsWeb) {
+      // Use Firebase Auth's signInWithPopup for web
+      final googleProvider = GoogleAuthProvider();
+      googleProvider.addScope('email');
+      googleProvider.addScope('profile');
+      return await _auth.signInWithPopup(googleProvider);
+    }
+
+    // Use google_sign_in package for mobile
+    final googleSignIn = GoogleSignIn(
+      scopes: ['email', 'profile'],
+    );
+
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) {
       throw Exception('Google sign in was cancelled');
@@ -65,9 +79,16 @@ class AuthService {
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
 
+    final accessToken = googleAuth.accessToken;
+    final idToken = googleAuth.idToken;
+
+    if (accessToken == null && idToken == null) {
+      throw Exception('Failed to get Google authentication tokens');
+    }
+
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
+      accessToken: accessToken,
+      idToken: idToken,
     );
 
     return await _auth.signInWithCredential(credential);
