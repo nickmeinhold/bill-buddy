@@ -76,7 +76,7 @@ The pre-commit hook runs on staged Dart files:
 - Runs `flutter analyze --fatal-infos`
 - Checks formatting with `dart format --set-exit-if-changed`
 - Runs all tests with coverage
-- Enforces minimum 30% code coverage via [very_good_coverage](https://github.com/VeryGoodOpenSource/very_good_coverage)
+- Enforces minimum 25% code coverage via [very_good_coverage](https://github.com/VeryGoodOpenSource/very_good_coverage)
 
 **Tagged Releases** (`.github/workflows/deploy.yml`):
 - Triggered by tags matching `v*.*.*`

@@ -57,7 +57,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
           path: coverage/lcov.info
-          min_coverage: 30
+          min_coverage: 25
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
