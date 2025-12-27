@@ -20,8 +20,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.5'
-          channel: 'stable'
+          flutter-version: "3.38.5"
+          channel: "stable"
           cache: true
 
       - name: Get dependencies
@@ -43,8 +43,8 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.5'
-          channel: 'stable'
+          flutter-version: "3.38.5"
+          channel: "stable"
           cache: true
 
       - name: Get dependencies
@@ -57,7 +57,7 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
           path: coverage/lcov.info
-          min_coverage: 25
+          min_coverage: 45
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
