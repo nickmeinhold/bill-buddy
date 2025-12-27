@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/encryption/encryption_provider.dart';
 import '../domain/auth_provider.dart';
+import 'encryption_passphrase_dialog.dart';
+import 'recovery_codes_screen.dart';
 
 /// Check if we should show Apple Sign In (iOS/macOS)
 bool get _showAppleSignIn =>
@@ -46,10 +49,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authServiceProvider).signInWithEmailAndPassword(
+      final credential = await ref.read(authServiceProvider).signInWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
+
+      // Unlock encryption with password
+      if (credential.user != null) {
+        try {
+          await ref.read(encryptionProvider.notifier).unlockForUser(
+                credential.user!.uid,
+                _passwordController.text,
+              );
+        } catch (e) {
+          // If encryption not set up yet (legacy user), initialize it
+          debugPrint('Encryption unlock failed, initializing: $e');
+          await ref.read(encryptionProvider.notifier).initializeForNewUser(
+                credential.user!.uid,
+                _passwordController.text,
+              );
+        }
+      }
     } catch (e) {
       setState(() {
         _errorMessage = _getErrorMessage(e);
@@ -70,7 +90,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authServiceProvider).signInWithGoogle();
+      final credential = await ref.read(authServiceProvider).signInWithGoogle();
+
+      if (credential.user != null && mounted) {
+        await _handleSocialAuthEncryption(credential.user!.uid);
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -86,6 +110,74 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  /// Handle encryption setup/unlock for social auth users
+  Future<void> _handleSocialAuthEncryption(String userId) async {
+    // Check if user has encryption set up
+    final hasEncryption =
+        await ref.read(encryptionProvider.notifier).checkEncryptionStatus(userId);
+
+    if (!hasEncryption) {
+      // New user - prompt to set passphrase
+      if (!mounted) return;
+      final passphrase = await EncryptionPassphraseDialog.show(
+        context,
+        isNewUser: true,
+      );
+
+      if (passphrase == null) {
+        // User cancelled - sign out
+        await ref.read(authServiceProvider).signOut();
+        return;
+      }
+
+      // Initialize encryption and show recovery codes
+      final recoveryCodes = await ref
+          .read(encryptionProvider.notifier)
+          .initializeForNewUser(userId, passphrase);
+
+      if (mounted) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => RecoveryCodesScreen(
+              recoveryCodes: recoveryCodes,
+              onAcknowledged: () {
+                Navigator.of(context).pop();
+                context.go('/');
+              },
+            ),
+          ),
+        );
+      }
+    } else {
+      // Existing user - prompt for passphrase
+      if (!mounted) return;
+      final passphrase = await EncryptionPassphraseDialog.show(
+        context,
+        isNewUser: false,
+      );
+
+      if (passphrase == null) {
+        // User cancelled - sign out
+        await ref.read(authServiceProvider).signOut();
+        return;
+      }
+
+      try {
+        await ref
+            .read(encryptionProvider.notifier)
+            .unlockForUser(userId, passphrase);
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = 'Incorrect passphrase. Please try again.';
+          });
+        }
+        // Sign out on wrong passphrase
+        await ref.read(authServiceProvider).signOut();
+      }
+    }
+  }
+
   Future<void> _signInWithApple() async {
     setState(() {
       _isLoading = true;
@@ -93,7 +185,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authServiceProvider).signInWithApple();
+      final credential = await ref.read(authServiceProvider).signInWithApple();
+
+      if (credential.user != null && mounted) {
+        await _handleSocialAuthEncryption(credential.user!.uid);
+      }
     } catch (e) {
       if (mounted) {
         setState(() {

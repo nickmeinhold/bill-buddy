@@ -24,6 +24,9 @@ dependencies:
   sign_in_with_apple: ^6.1.0
   crypto: ^3.0.3
 
+  # Encryption
+  pointycastle: ^3.9.1
+
   # Routing
   go_router: ^14.8.1
 

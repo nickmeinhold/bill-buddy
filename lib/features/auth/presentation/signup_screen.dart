@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/encryption/encryption_provider.dart';
 import '../domain/auth_provider.dart';
+import 'recovery_codes_screen.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -60,6 +62,29 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
         // Update display name
         await credential.user!.updateDisplayName(_nameController.text.trim());
+
+        // Initialize encryption and get recovery codes
+        final recoveryCodes = await ref
+            .read(encryptionProvider.notifier)
+            .initializeForNewUser(
+              credential.user!.uid,
+              _passwordController.text,
+            );
+
+        // Show recovery codes screen
+        if (mounted) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => RecoveryCodesScreen(
+                recoveryCodes: recoveryCodes,
+                onAcknowledged: () {
+                  Navigator.of(context).pop();
+                  context.go('/');
+                },
+              ),
+            ),
+          );
+        }
       }
     } catch (e) {
       final errorString = e.toString();
