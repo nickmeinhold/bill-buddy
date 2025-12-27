@@ -117,6 +117,7 @@ lib/
 **Routing** uses ShellRoute for persistent bottom navigation across 5 tabs: Dashboard, Transactions, Subscriptions, Budgets, Bills.
 
 **Encryption routing** in `app_router.dart`:
+
 - Watches `authStateProvider`, `pendingRecoveryCodesProvider`, and `encryptionProvider.select((s) => s.isUnlocked)`
 - After login, redirects to `/encryption-setup` which handles passphrase flow
 - After new user setup, redirects to `/recovery-codes` before dashboard

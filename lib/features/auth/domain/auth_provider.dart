@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -109,18 +109,18 @@ class AuthService {
     );
 
     // Debug logging
-    print('Apple credential received:');
-    print('  userIdentifier: ${appleCredential.userIdentifier}');
-    print('  email: ${appleCredential.email}');
-    print('  identityToken length: ${appleCredential.identityToken?.length}');
-    print('  authorizationCode length: ${appleCredential.authorizationCode?.length}');
+    debugPrint('Apple credential received:');
+    debugPrint('  userIdentifier: ${appleCredential.userIdentifier}');
+    debugPrint('  email: ${appleCredential.email}');
+    debugPrint('  identityToken length: ${appleCredential.identityToken?.length}');
+    debugPrint('  authorizationCode length: ${appleCredential.authorizationCode.length}');
 
     // Decode JWT to see the bundle ID (aud claim)
     if (appleCredential.identityToken != null) {
       final parts = appleCredential.identityToken!.split('.');
       if (parts.length >= 2) {
         final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
-        print('  JWT payload: $payload');
+        debugPrint('  JWT payload: $payload');
       }
     }
 

@@ -116,16 +116,16 @@ class TransactionService {
     // Encrypt sensitive fields
     encrypted['merchantName'] = _encryptionService.encryptField(
       data['merchantName'] as String,
-      _dek!,
+      _dek,
     );
     encrypted['amount'] = _encryptionService.encryptAmount(
       data['amount'] as double,
-      _dek!,
+      _dek,
     );
     if (data['notes'] != null) {
       encrypted['notes'] = _encryptionService.encryptField(
         data['notes'] as String,
-        _dek!,
+        _dek,
       );
     }
 

@@ -95,16 +95,16 @@ class SubscriptionService {
     // Encrypt sensitive fields
     encrypted['name'] = _encryptionService.encryptField(
       data['name'] as String,
-      _dek!,
+      _dek,
     );
     encrypted['amount'] = _encryptionService.encryptAmount(
       data['amount'] as double,
-      _dek!,
+      _dek,
     );
     if (data['notes'] != null) {
       encrypted['notes'] = _encryptionService.encryptField(
         data['notes'] as String,
-        _dek!,
+        _dek,
       );
     }
 
