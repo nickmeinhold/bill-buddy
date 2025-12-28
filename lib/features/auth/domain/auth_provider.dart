@@ -94,7 +94,6 @@ class AuthService {
 
   /// Sign in with Apple (for iOS/macOS)
   Future<UserCredential> signInWithApple() async {
-    // Generate a random nonce for security
     final rawNonce = _generateNonce();
     final nonce = _sha256ofString(rawNonce);
 
@@ -106,29 +105,6 @@ class AuthService {
       nonce: nonce,
     );
 
-    // Debug logging
-    debugPrint('Apple credential received:');
-    debugPrint('  userIdentifier: ${appleCredential.userIdentifier}');
-    debugPrint('  email: ${appleCredential.email}');
-    debugPrint(
-      '  identityToken length: ${appleCredential.identityToken?.length}',
-    );
-    debugPrint(
-      '  authorizationCode length: ${appleCredential.authorizationCode.length}',
-    );
-
-    // Decode JWT to see the bundle ID (aud claim)
-    if (appleCredential.identityToken != null) {
-      final parts = appleCredential.identityToken!.split('.');
-      if (parts.length >= 2) {
-        final payload = utf8.decode(
-          base64Url.decode(base64Url.normalize(parts[1])),
-        );
-        debugPrint('  JWT payload: $payload');
-      }
-    }
-
-    // Check if we got a valid identity token
     final identityToken = appleCredential.identityToken;
     if (identityToken == null) {
       throw Exception('Apple Sign In failed: No identity token received');
@@ -141,13 +117,10 @@ class AuthService {
     final userCredential = await _auth.signInWithCredential(oauthCredential);
 
     // Update display name if provided (Apple only sends it on first sign-in)
-    if (appleCredential.givenName != null ||
-        appleCredential.familyName != null) {
-      final displayName = [
-        appleCredential.givenName,
-        appleCredential.familyName,
-      ].where((n) => n != null).join(' ');
-
+    final givenName = appleCredential.givenName;
+    final familyName = appleCredential.familyName;
+    if (givenName != null || familyName != null) {
+      final displayName = [givenName, familyName].whereType<String>().join(' ');
       if (displayName.isNotEmpty) {
         await userCredential.user?.updateDisplayName(displayName);
       }
