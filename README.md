@@ -12,7 +12,7 @@ A personal finance app built with Flutter, inspired by [Rocket Money](https://ww
 
 ## Screenshots
 
-*Coming soon*
+### Coming soon
 
 ## Getting Started
 
@@ -26,17 +26,28 @@ A personal finance app built with Flutter, inspired by [Rocket Money](https://ww
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/yourusername/bill_buddy.git
    cd bill_buddy
    ```
 
-2. Install dependencies:
+2. Set up pre-commit hooks:
+
+   ```bash
+   git config core.hooksPath .githooks
+   ```
+
+   This enables automatic code formatting and linting checks before each commit.
+
+3. Install dependencies:
+
    ```bash
    flutter pub get
    ```
 
-3. Configure Firebase:
+4. Configure Firebase:
+
    ```bash
    # Install FlutterFire CLI if needed
    dart pub global activate flutterfire_cli
@@ -45,7 +56,8 @@ A personal finance app built with Flutter, inspired by [Rocket Money](https://ww
    flutterfire configure
    ```
 
-4. Set up Firestore security rules in Firebase Console:
+5. Set up Firestore security rules in Firebase Console:
+
    ```javascript
    rules_version = '2';
    service cloud.firestore {
@@ -57,11 +69,12 @@ A personal finance app built with Flutter, inspired by [Rocket Money](https://ww
    }
    ```
 
-5. Enable Authentication in Firebase Console:
+6. Enable Authentication in Firebase Console:
    - Go to Authentication > Sign-in method
    - Enable Email/Password
 
-6. Run the app:
+7. Run the app:
+
    ```bash
    flutter run
    ```
@@ -77,7 +90,7 @@ A personal finance app built with Flutter, inspired by [Rocket Money](https://ww
 
 ## Project Structure
 
-```
+```text
 lib/
 ├── core/           # Constants and theming
 ├── features/       # Feature modules (auth, dashboard, transactions, etc.)
