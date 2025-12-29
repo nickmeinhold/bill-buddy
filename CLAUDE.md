@@ -58,27 +58,17 @@ flutter build macos
 
 ## Development Setup
 
-### Pre-commit Hooks
-
-The project uses git hooks to ensure code quality before commits. After cloning, run:
-
-```bash
-git config core.hooksPath .githooks
-```
-
-The pre-commit hook runs on staged Dart files:
-1. `dart format --set-exit-if-changed` - checks formatting
-2. `flutter analyze --fatal-infos` - runs linter with infos as errors
-
 ### CI/CD
 
 **Pull Requests** (`.github/workflows/test.yml`):
+
 - Runs `flutter analyze --fatal-infos`
 - Checks formatting with `dart format --set-exit-if-changed`
 - Runs all tests with coverage
 - Enforces minimum 45% code coverage via [very_good_coverage](https://github.com/VeryGoodOpenSource/very_good_coverage)
 
 **Tagged Releases** (`.github/workflows/deploy.yml`):
+
 - Triggered by tags matching `v*.*.*`
 - Builds and deploys web to Firebase Hosting
 - Builds Android APK and attaches to GitHub release
@@ -208,26 +198,10 @@ Apple Sign In is implemented in code but fails with Firebase error:
 - `signInWithApple()` method in `AuthService` (`lib/features/auth/domain/auth_provider.dart`)
 - Apple Sign In button shows on iOS/macOS in `LoginScreen`
 - iOS/macOS entitlements configured for Sign in with Apple
-- App ID `co.enspyr.billBuddy` has Sign in with Apple capability enabled
+- App ID `co.enspyr.billBuddy` configured as primary App ID for Sign in with Apple
+- Team ID: `SPL85G447K`
 
-**The problem:**
-Firebase requires the Sign in with Apple key's **Primary App ID** to directly match the app's bundle ID. Using Apple's "Group with existing primary App ID" feature does NOT work with Firebase.
-
-**Current Apple Developer configuration:**
-
-- App ID: `co.enspyr.billBuddy` (grouped with `co.enspyr.enspyr`)
-- Services ID: `co.enspyr.billBuddy.service`
-- Key: Primary App ID is `co.enspyr.enspyr` (shared across multiple apps)
-- Firebase configured with Team ID, Key ID, Private Key, Services ID
-
-**To fix:**
-Create a new Sign in with Apple key with Primary App ID set directly to `co.enspyr.billBuddy` (no grouping). Apple allows up to 5 keys per account.
-
-1. Go to <https://developer.apple.com/account/resources/authkeys/list>
-2. Create new key with "Sign in with Apple" enabled
-3. Set Primary App ID to `co.enspyr.billBuddy`
-4. Download the .p8 file and note the Key ID
-5. Update Firebase Console → Authentication → Apple provider with new Key ID and Private Key
+**Status:** Still investigating. Native iOS Sign in with Apple doesn't require the .p8 key (that's only for web/Android OAuth). The issue may be related to Firebase iOS app configuration or propagation delays after Apple Developer account changes.
 
 ## Firebase Setup
 
