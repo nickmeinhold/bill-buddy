@@ -110,9 +110,11 @@ class AuthService {
       throw Exception('Apple Sign In failed: No identity token received');
     }
 
-    final oauthCredential = OAuthProvider(
-      'apple.com',
-    ).credential(idToken: identityToken, rawNonce: rawNonce);
+    final oauthCredential = OAuthProvider('apple.com').credential(
+      idToken: identityToken,
+      accessToken: appleCredential.authorizationCode,
+      rawNonce: rawNonce,
+    );
 
     final userCredential = await _auth.signInWithCredential(oauthCredential);
 
