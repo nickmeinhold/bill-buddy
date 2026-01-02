@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../shared/models/account_model.dart';
 import '../../../shared/models/transaction_model.dart';
+import '../../accounts/domain/accounts_provider.dart';
 import '../domain/transactions_provider.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
@@ -27,6 +29,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   late DateTime _date;
   late bool _isExpense;
   late bool _isSubscription;
+  String? _accountId;
 
   bool _isLoading = false;
 
@@ -45,6 +48,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
     _date = tx?.date ?? DateTime.now();
     _isExpense = tx?.isExpense ?? true;
     _isSubscription = tx?.isSubscription ?? false;
+    _accountId = tx?.accountId;
   }
 
   @override
@@ -81,6 +85,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         date: _date,
         category: _category,
         isSubscription: _isSubscription,
+        accountId: _accountId,
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
@@ -149,6 +154,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final accountsAsync = ref.watch(accountsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -223,6 +229,58 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
               },
             ),
             const SizedBox(height: 16),
+            // Account Selector
+            accountsAsync.when(
+              data: (accounts) {
+                if (accounts.isEmpty) return const SizedBox.shrink();
+
+                // If account ID is null and not editing, default to first account
+                if (_accountId == null && !_isEditing && accounts.isNotEmpty) {
+                  // Initializing in build is tricky, usually done in initState or effect.
+                  // But since accounts are async, we can just select the first one if current is null.
+                  // However, for proper state management, let's just let the user pick or show "Select Account"
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: DropdownButtonFormField<String>(
+                    value: _accountId,
+                    decoration: const InputDecoration(labelText: 'Account'),
+                    hint: const Text('Select Account'),
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('Unassigned'),
+                      ),
+                      ...accounts.map((acc) {
+                        return DropdownMenuItem(
+                          value: acc.id,
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.account_balance,
+                                color: Color(acc.color),
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(acc.name),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                    onChanged: (value) {
+                      setState(() => _accountId = value);
+                    },
+                  ),
+                );
+              },
+              loading: () => const Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: LinearProgressIndicator(),
+              ),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: const Text('Date'),

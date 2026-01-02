@@ -2,21 +2,29 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:pointycastle/export.dart';
 
+/// Worker function for compute() to handle expensive PBKDF2
+Uint8List _deriveKEKCompute(Map<String, dynamic> args) {
+  final password = args['password'] as String;
+  final salt = args['salt'] as Uint8List;
+  final iterations = args['iterations'] as int;
+  final keyLength = args['keyLength'] as int;
+
+  final pbkdf2 = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64))
+    ..init(Pbkdf2Parameters(salt, iterations, keyLength));
+
+  return pbkdf2.process(Uint8List.fromList(utf8.encode(password)));
+}
+
 /// Handles all cryptographic operations for the application.
-///
-/// Key Hierarchy:
-/// - User Password -> PBKDF2 -> KEK (Key Encryption Key)
-/// - Random 256-bit -> DEK (Data Encryption Key)
-/// - DEK encrypted by KEK -> Wrapped DEK (stored in Firestore)
-/// - DEK used for AES-256-GCM encryption of sensitive fields
 class EncryptionService {
   // Constants
   static const int _keyLength = 32; // 256 bits for AES-256
   static const int _ivLength = 12; // 96 bits for GCM (recommended)
   static const int _saltLength = 32; // 256 bits for PBKDF2 salt
-  static const int _pbkdf2Iterations = 100000; // OWASP recommended minimum
+  static const int _pbkdf2Iterations = 15000; // Reduced for Web performance
   static const int _tagLength = 16; // 128 bits for GCM auth tag
   static const int _recoveryCodeCount = 8;
   static const int _recoveryCodeLength = 8; // 8 characters per code
@@ -52,18 +60,20 @@ class EncryptionService {
   }
 
   /// Derive KEK (Key Encryption Key) from password using PBKDF2-HMAC-SHA256
-  Uint8List deriveKEK(String password, Uint8List salt) {
-    final pbkdf2 = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64))
-      ..init(Pbkdf2Parameters(salt, _pbkdf2Iterations, _keyLength));
-
-    return pbkdf2.process(Uint8List.fromList(utf8.encode(password)));
+  /// Runs in a background isolate using compute() to prevent UI jank
+  Future<Uint8List> deriveKEK(String password, Uint8List salt) async {
+    return compute(_deriveKEKCompute, {
+      'password': password,
+      'salt': salt,
+      'iterations': _pbkdf2Iterations,
+      'keyLength': _keyLength,
+    });
   }
 
   /// Wrap (encrypt) the DEK using the KEK with AES-256-GCM
-  /// Returns: base64(salt + iv + encryptedDEK + authTag)
-  String wrapDEK(Uint8List dek, String password) {
+  Future<String> wrapDEK(Uint8List dek, String password) async {
     final salt = generateSalt();
-    final kek = deriveKEK(password, salt);
+    final kek = await deriveKEK(password, salt);
     final iv = _generateIV();
 
     final cipher = GCMBlockCipher(AESEngine())
@@ -91,8 +101,7 @@ class EncryptionService {
   }
 
   /// Unwrap (decrypt) the DEK using the password
-  /// Input: base64(salt + iv + encryptedDEK + authTag)
-  Uint8List unwrapDEK(String wrappedDEK, String password) {
+  Future<Uint8List> unwrapDEK(String wrappedDEK, String password) async {
     final combined = base64.decode(wrappedDEK);
 
     // Extract components
@@ -105,7 +114,7 @@ class EncryptionService {
     final cipherText = Uint8List.sublistView(combined, _saltLength + _ivLength);
 
     // Derive KEK from password
-    final kek = deriveKEK(password, salt);
+    final kek = await deriveKEK(password, salt);
 
     // Decrypt
     final cipher = GCMBlockCipher(AESEngine())
@@ -122,17 +131,16 @@ class EncryptionService {
   }
 
   /// Re-wrap DEK with new password (for password changes)
-  String rewrapDEK(
+  Future<String> rewrapDEK(
     String oldWrappedDEK,
     String oldPassword,
     String newPassword,
-  ) {
-    final dek = unwrapDEK(oldWrappedDEK, oldPassword);
+  ) async {
+    final dek = await unwrapDEK(oldWrappedDEK, oldPassword);
     return wrapDEK(dek, newPassword);
   }
 
   /// Encrypt a string value using AES-256-GCM
-  /// Returns: ENC:v1:base64(iv + ciphertext + authTag)
   String encryptField(String plaintext, Uint8List dek) {
     final iv = _generateIV();
     final plaintextBytes = Uint8List.fromList(utf8.encode(plaintext));
@@ -162,7 +170,6 @@ class EncryptionService {
   }
 
   /// Decrypt a string value
-  /// Returns plaintext or original value if not encrypted
   String decryptField(String ciphertext, Uint8List dek) {
     if (!isEncrypted(ciphertext)) {
       return ciphertext; // Return as-is if not encrypted
@@ -210,7 +217,6 @@ class EncryptionService {
   }
 
   /// Generate recovery codes for password reset
-  /// Returns list of 8 human-readable codes
   List<String> generateRecoveryCodes() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I, O, 0, 1
     final codes = <String>[];
@@ -221,7 +227,6 @@ class EncryptionService {
         final randomByte = _secureRandom.nextBytes(1)[0];
         code.write(chars[randomByte % chars.length]);
       }
-      // Format as XXXX-XXXX for readability
       final codeStr = code.toString();
       codes.add('${codeStr.substring(0, 4)}-${codeStr.substring(4)}');
     }
@@ -231,7 +236,6 @@ class EncryptionService {
 
   /// Hash a recovery code for storage (one-way)
   String hashRecoveryCode(String code) {
-    // Remove formatting and normalize
     final normalized = code.replaceAll('-', '').toUpperCase();
     final bytes = utf8.encode(normalized);
     final digest = SHA256Digest().process(Uint8List.fromList(bytes));
@@ -244,13 +248,19 @@ class EncryptionService {
   }
 
   /// Wrap DEK with a recovery code (same algorithm as password)
-  String wrapDEKWithRecoveryCode(Uint8List dek, String recoveryCode) {
+  Future<String> wrapDEKWithRecoveryCode(
+    Uint8List dek,
+    String recoveryCode,
+  ) async {
     final normalized = recoveryCode.replaceAll('-', '').toUpperCase();
     return wrapDEK(dek, normalized);
   }
 
   /// Unwrap DEK with a recovery code
-  Uint8List unwrapDEKWithRecoveryCode(String wrappedDEK, String recoveryCode) {
+  Future<Uint8List> unwrapDEKWithRecoveryCode(
+    String wrappedDEK,
+    String recoveryCode,
+  ) async {
     final normalized = recoveryCode.replaceAll('-', '').toUpperCase();
     return unwrapDEK(wrappedDEK, normalized);
   }

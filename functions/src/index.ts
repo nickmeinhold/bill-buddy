@@ -26,97 +26,99 @@ export const parseStatement = onObjectFinalized(
     region: "australia-southeast1",
   },
   async (event) => {
-  const filePath = event.data.name;
-  const contentType = event.data.contentType;
+    const filePath = event.data.name;
+    const contentType = event.data.contentType;
 
-  // Only process PDF files in the statements folder
-  if (!filePath || !contentType?.includes("pdf")) {
-    console.log("Not a PDF file, skipping");
-    return;
-  }
-
-  // Expected path: users/{userId}/statements/{filename}
-  const pathParts = filePath.split("/");
-  if (pathParts.length !== 4 || pathParts[0] !== "users" || pathParts[2] !== "statements") {
-    console.log("Not a statement file, skipping:", filePath);
-    return;
-  }
-
-  const userId = pathParts[1];
-  const fileName = pathParts[3];
-
-  console.log(`Processing statement for user ${userId}: ${fileName}`);
-
-  // Find the statement document by storagePath
-  const statementsRef = db.collection("users").doc(userId).collection("statements");
-  const querySnapshot = await statementsRef
-    .where("storagePath", "==", filePath)
-    .limit(1)
-    .get();
-
-  if (querySnapshot.empty) {
-    console.error("No statement document found for:", filePath);
-    return;
-  }
-
-  const statementDoc = querySnapshot.docs[0];
-  const statementId = statementDoc.id;
-
-  try {
-    // Download the PDF from Storage
-    const bucket = storage.bucket(event.data.bucket);
-    const file = bucket.file(filePath);
-    const [buffer] = await file.download();
-
-    // Parse the PDF
-    const parser = new PDFParse({ data: buffer });
-    const pdfData = await parser.getText();
-    const text = pdfData.text;
-    await parser.destroy();
-
-    console.log("Extracted PDF text length:", text.length);
-
-    // Parse transactions from the text
-    const transactions = parseTransactionsFromText(text);
-
-    console.log(`Found ${transactions.length} transactions`);
-
-    // Write transactions to Firestore
-    const transactionsRef = db.collection("users").doc(userId).collection("transactions");
-    const batch = db.batch();
-
-    for (const tx of transactions) {
-      const docRef = transactionsRef.doc();
-      batch.set(docRef, {
-        merchantName: tx.merchantName,
-        amount: tx.amount,
-        date: tx.date.toISOString(),
-        category: tx.category,
-        isSubscription: false,
-        notes: null,
-        accountId: null,
-        statementId: statementId,
-      });
+    // Only process PDF files in the statements folder
+    if (!filePath || !contentType?.includes("pdf")) {
+      console.log("Not a PDF file, skipping");
+      return;
     }
 
-    await batch.commit();
+    // Expected path: users/{userId}/statements/{filename}
+    const pathParts = filePath.split("/");
+    if (pathParts.length !== 4 || pathParts[0] !== "users" || pathParts[2] !== "statements") {
+      console.log("Not a statement file, skipping:", filePath);
+      return;
+    }
 
-    // Update statement status to completed
-    await statementDoc.ref.update({
-      status: "completed",
-      transactionCount: transactions.length,
-    });
+    const userId = pathParts[1];
+    const fileName = pathParts[3];
 
-    console.log(`Successfully processed ${transactions.length} transactions for statement ${statementId}`);
-  } catch (error) {
-    console.error("Error processing statement:", error);
+    console.log(`Processing statement for user ${userId}: ${fileName}`);
 
-    // Update statement status to failed
-    await statementDoc.ref.update({
-      status: "failed",
-      errorMessage: error instanceof Error ? error.message : "Unknown error occurred",
-    });
-  }
+    // Find the statement document by storagePath
+    const statementsRef = db.collection("users").doc(userId).collection("statements");
+    const querySnapshot = await statementsRef
+      .where("storagePath", "==", filePath)
+      .limit(1)
+      .get();
+
+    if (querySnapshot.empty) {
+      console.error("No statement document found for:", filePath);
+      return;
+    }
+
+    const statementDoc = querySnapshot.docs[0];
+    const statementData = statementDoc.data();
+    const statementId = statementDoc.id;
+    const accountId = statementData?.accountId || null;
+
+    try {
+      // Download the PDF from Storage
+      const bucket = storage.bucket(event.data.bucket);
+      const file = bucket.file(filePath);
+      const [buffer] = await file.download();
+
+      // Parse the PDF
+      const parser = new PDFParse({ data: buffer });
+      const pdfData = await parser.getText();
+      const text = pdfData.text;
+      await parser.destroy();
+
+      console.log("Extracted PDF text length:", text.length);
+
+      // Parse transactions from the text
+      const transactions = parseTransactionsFromText(text);
+
+      console.log(`Found ${transactions.length} transactions`);
+
+      // Write transactions to Firestore
+      const transactionsRef = db.collection("users").doc(userId).collection("transactions");
+      const batch = db.batch();
+
+      for (const tx of transactions) {
+        const docRef = transactionsRef.doc();
+        batch.set(docRef, {
+          merchantName: tx.merchantName,
+          amount: tx.amount,
+          date: tx.date.toISOString(),
+          category: tx.category,
+          isSubscription: false,
+          notes: null,
+          accountId: accountId,
+          statementId: statementId,
+        });
+      }
+
+      await batch.commit();
+
+      // Update statement status to completed
+      await statementDoc.ref.update({
+        status: "completed",
+        transactionCount: transactions.length,
+      });
+
+      console.log(`Successfully processed ${transactions.length} transactions for statement ${statementId}`);
+    } catch (error) {
+      console.error("Error processing statement:", error);
+
+      // Update statement status to failed
+      await statementDoc.ref.update({
+        status: "failed",
+        errorMessage: error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    }
   }
 );
 

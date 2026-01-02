@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/encryption/encryption_provider.dart';
@@ -25,6 +26,11 @@ class DashboardScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_balance),
+            tooltip: 'Manage Accounts',
+            onPressed: () => GoRouter.of(context).push('/accounts'),
           ),
           IconButton(
             icon: const Icon(Icons.logout),

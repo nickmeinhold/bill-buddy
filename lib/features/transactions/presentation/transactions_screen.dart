@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/models/account_model.dart';
 import '../../../shared/models/transaction_model.dart';
+import '../../accounts/domain/accounts_provider.dart';
 import '../domain/transactions_provider.dart';
 import 'transaction_form_screen.dart';
 
@@ -15,6 +17,7 @@ class TransactionsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM d, yyyy');
     final transactionsAsync = ref.watch(filteredTransactionsProvider);
+    final accountsAsync = ref.watch(accountsProvider);
     final currentFilter = ref.watch(transactionFilterProvider);
 
     return Scaffold(
@@ -91,8 +94,20 @@ class TransactionsScreen extends ConsumerWidget {
                   itemCount: transactions.length,
                   itemBuilder: (context, index) {
                     final tx = transactions[index];
+                    AccountModel? account;
+
+                    // Try to find account if accounts loaded
+                    if (tx.accountId != null && accountsAsync.hasValue) {
+                      try {
+                        account = accountsAsync.value!.firstWhere(
+                          (a) => a.id == tx.accountId,
+                        );
+                      } catch (_) {}
+                    }
+
                     return _TransactionCard(
                       transaction: tx,
+                      account: account,
                       dateFormat: dateFormat,
                       onTap: () => _showTransactionForm(context, tx),
                     );
@@ -133,11 +148,13 @@ class TransactionsScreen extends ConsumerWidget {
 
 class _TransactionCard extends StatelessWidget {
   final TransactionModel transaction;
+  final AccountModel? account;
   final DateFormat dateFormat;
   final VoidCallback? onTap;
 
   const _TransactionCard({
     required this.transaction,
+    this.account,
     required this.dateFormat,
     this.onTap,
   });
@@ -164,11 +181,41 @@ class _TransactionCard extends StatelessWidget {
           ),
         ),
         title: Text(transaction.merchantName),
-        subtitle: Text(
-          '${transaction.category} • ${dateFormat.format(transaction.date)}',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '${transaction.category} • ${dateFormat.format(transaction.date)}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (account != null || transaction.accountId == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.account_balance,
+                      size: 12,
+                      color: account != null
+                          ? Color(account!.color)
+                          : Colors.grey,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      account?.name ?? 'Unassigned',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: account != null
+                            ? Color(account!.color)
+                            : Colors.grey,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
         trailing: Text(
           '${isExpense ? '-' : '+'}\$${transaction.absoluteAmount.toStringAsFixed(2)}',

@@ -61,6 +61,7 @@ class StatementService {
   Future<String> uploadStatement({
     required String fileName,
     required Uint8List fileBytes,
+    String? accountId,
   }) async {
     final collection = _collection;
     final storageRef = _storageRef;
@@ -86,6 +87,7 @@ class StatementService {
       uploadedAt: DateTime.now(),
       status: StatementStatus.processing,
       storagePath: 'users/$_userId/statements/$storagePath',
+      accountId: accountId,
     );
 
     final docRef = await collection.add(statement.toMap());

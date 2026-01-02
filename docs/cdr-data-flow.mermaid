@@ -1,0 +1,75 @@
+sequenceDiagram
+    autonumber
+    
+    participant User as Consumer
+    participant App as Bill Buddy App
+    participant ADR as ADR Backend
+    participant Register as CDR Register
+    participant Bank as Data Holder (Bank)
+
+    %% Initial Setup (One-time)
+    Note over ADR,Register: Initial Registration (One-time)
+    ADR->>Register: Register as ADR (ACCC accreditation)
+    Register-->>ADR: ADR credentials & certificates
+    ADR->>Bank: Dynamic Client Registration
+    Bank-->>ADR: Client ID for this Data Holder
+
+    %% Consumer Initiates Connection
+    Note over User,Bank: Consumer Consent Flow
+    User->>App: "Connect my bank account"
+    App->>ADR: Initiate connection request
+    ADR->>Register: Get Data Holder endpoints
+    Register-->>ADR: Bank's authorization/token URLs
+    
+    ADR->>Bank: Pushed Authorization Request (PAR)
+    Bank-->>ADR: request_uri
+    
+    ADR->>App: Redirect URL with request_uri
+    App->>User: Redirect to bank login
+    User->>Bank: Authenticate (username/password/MFA)
+    Bank->>User: Show consent screen
+    User->>Bank: Grant consent
+    Bank->>App: Redirect with authorization code
+    App->>ADR: Forward authorization code
+
+    %% Token Exchange
+    Note over ADR,Bank: Token Exchange (mTLS secured)
+    ADR->>Bank: Exchange code for tokens (POST /token)
+    Bank-->>ADR: access_token + refresh_token + id_token
+    ADR->>ADR: Store tokens securely
+
+    %% Data Retrieval
+    Note over ADR,Bank: Data Retrieval
+    ADR->>Bank: GET /banking/accounts
+    Bank-->>ADR: Account list (BSBs, balances)
+    
+    ADR->>Bank: GET /banking/accounts/{id}/transactions
+    Bank-->>ADR: Transaction history
+    
+    ADR->>Bank: GET /banking/accounts/{id}/direct-debits
+    Bank-->>ADR: Scheduled payments & direct debits
+
+    %% Data Processing
+    Note over App,ADR: Data Processing
+    ADR->>ADR: Store in CDR data environment
+    ADR->>ADR: ML categorisation (subscriptions, bills)
+    ADR->>App: Processed data + insights
+    App->>User: "Found 12 subscriptions, $847/month"
+
+    %% Ongoing Access
+    Note over ADR,Bank: Ongoing Data Refresh
+    loop Every few hours / on-demand
+        ADR->>Bank: GET /banking/accounts/{id}/transactions
+        Bank-->>ADR: New transactions
+        ADR->>App: Push updates
+    end
+
+    %% Consent Withdrawal
+    Note over User,Bank: Consent Withdrawal (if requested)
+    User->>App: "Disconnect bank"
+    App->>ADR: Revoke consent
+    ADR->>Bank: DELETE consent arrangement
+    Bank-->>ADR: Consent revoked
+    ADR->>ADR: Delete CDR data (within 7 days)
+    ADR-->>App: Confirmation
+    App->>User: "Bank disconnected"

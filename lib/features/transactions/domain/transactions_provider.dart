@@ -9,49 +9,58 @@ import '../../../shared/models/transaction_model.dart';
 import '../../auth/domain/auth_provider.dart';
 import '../../subscriptions/domain/subscriptions_provider.dart';
 
-final transactionsProvider = StreamProvider.autoDispose<List<TransactionModel>>(
-  (ref) {
-    final user = ref.watch(authStateProvider).valueOrNull;
-    final encryptionState = ref.watch(encryptionProvider);
+final transactionsProvider = StreamProvider.autoDispose<List<TransactionModel>>((
+  ref,
+) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  final encryptionState = ref.watch(encryptionProvider);
 
-    // Wait for both auth and encryption to be ready
-    if (user == null || !encryptionState.isUnlocked) return Stream.value([]);
+  // Wait for both auth and encryption to be ready
+  if (user == null || !encryptionState.isUnlocked) return Stream.value([]);
 
-    final firestore = ref.watch(firestoreProvider);
-    final encryptionService = ref.watch(encryptionServiceProvider);
-    final dek = encryptionState.dek!;
+  final firestore = ref.watch(firestoreProvider);
+  final encryptionService = ref.watch(encryptionServiceProvider);
+  final dek = encryptionState.dek!;
 
-    return firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('transactions')
-        .orderBy('date', descending: true)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs.map((doc) {
-            final data = Map<String, dynamic>.from(doc.data());
+  return firestore
+      .collection('users')
+      .doc(user.uid)
+      .collection('transactions')
+      .orderBy('date', descending: true)
+      .snapshots()
+      .map(
+        (snapshot) => snapshot.docs.map((doc) {
+          final data = Map<String, dynamic>.from(doc.data());
 
-            // Decrypt sensitive fields
+          // Decrypt sensitive fields
+          // Decrypt sensitive fields
+          if (data['merchantName'] is String) {
             data['merchantName'] = encryptionService.decryptField(
               data['merchantName'] as String,
               dek,
             );
+          }
+
+          // amount can be String (encrypted) or number (unencrypted from PDF parser)
+          if (data['amount'] is String) {
             data['amount'] = encryptionService.decryptAmount(
               data['amount'] as String,
               dek,
             );
-            if (data['notes'] != null) {
-              data['notes'] = encryptionService.decryptField(
-                data['notes'] as String,
-                dek,
-              );
-            }
+          }
+          // If amount is already a number, we leave it as is
 
-            return TransactionModel.fromMap(data, doc.id);
-          }).toList(),
-        );
-  },
-);
+          if (data['notes'] != null && data['notes'] is String) {
+            data['notes'] = encryptionService.decryptField(
+              data['notes'] as String,
+              dek,
+            );
+          }
+
+          return TransactionModel.fromMap(data, doc.id);
+        }).toList(),
+      );
+});
 
 enum TransactionFilter { all, income, expenses, subscriptions }
 

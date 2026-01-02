@@ -1,113 +1,70 @@
 # Bill Buddy
 
-A personal finance app built with Flutter, inspired by [Rocket Money](https://www.rocketmoney.com/). Track your subscriptions, bills, budgets, and transactions all in one place.
+A personal finance app for tracking subscriptions, bills, budgets, and transactions—built with Flutter and Firebase.
 
 ## Features
 
-- **Dashboard** - Overview of monthly spending, active subscriptions, upcoming bills, recent transactions, and budget progress
-- **Subscriptions** - Track recurring subscriptions with monthly/yearly cost calculations
-- **Bills** - Manage bills with due dates, payment status, and reminders
-- **Budgets** - Set spending limits by category and track progress
-- **Transactions** - Log income and expenses with filtering options
-
-## Screenshots
-
-### Coming soon
-
-## Getting Started
-
-### Prerequisites
-
-- Flutter SDK (3.10+)
-- Firebase project
-- Xcode (for iOS/macOS)
-- Android Studio (for Android)
-
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/yourusername/bill_buddy.git
-   cd bill_buddy
-   ```
-
-2. Set up pre-commit hooks:
-
-   ```bash
-   git config core.hooksPath .githooks
-   ```
-
-   This enables automatic code formatting and linting checks before each commit.
-
-3. Install dependencies:
-
-   ```bash
-   flutter pub get
-   ```
-
-4. Configure Firebase:
-
-   ```bash
-   # Install FlutterFire CLI if needed
-   dart pub global activate flutterfire_cli
-
-   # Configure Firebase (generates lib/firebase_options.dart)
-   flutterfire configure
-   ```
-
-5. Set up Firestore security rules in Firebase Console:
-
-   ```javascript
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /users/{userId}/{document=**} {
-         allow read, write: if request.auth != null && request.auth.uid == userId;
-       }
-     }
-   }
-   ```
-
-6. Enable Authentication in Firebase Console:
-   - Go to Authentication > Sign-in method
-   - Enable Email/Password
-
-7. Run the app:
-
-   ```bash
-   flutter run
-   ```
+- **Subscription tracking**: Monitor recurring charges and upcoming payments
+- **Bill management**: Track due dates with reminders
+- **Budget monitoring**: Set spending limits by category
+- **Transaction history**: View and categorize spending
+- **Bank statement parsing**: Upload PDF statements to auto-import transactions
+- **Client-side encryption**: All sensitive financial data encrypted with your passphrase—not even Firebase can read it
 
 ## Tech Stack
 
-- **Framework**: Flutter
+- **Frontend**: Flutter (iOS, Android, macOS, Web)
 - **State Management**: Riverpod
 - **Routing**: GoRouter
-- **Backend**: Firebase (Auth + Firestore)
+- **Backend**: Firebase (Auth + Firestore + Storage + Cloud Functions)
 - **Charts**: fl_chart
-- **Fonts**: Google Fonts (Inter)
 
-## Project Structure
+## Getting Started
 
-```text
-lib/
-├── core/           # Constants and theming
-├── features/       # Feature modules (auth, dashboard, transactions, etc.)
-│   └── {feature}/
-│       ├── domain/        # Providers and services
-│       └── presentation/  # Screens and widgets
-├── routing/        # GoRouter configuration
-└── shared/         # Shared models and widgets
+```bash
+# Install dependencies
+flutter pub get
+
+# Run the app
+flutter run
+
+# Run on specific platform
+flutter run -d macos
+flutter run -d chrome
 ```
 
-## Supported Platforms
+## Development
 
-- iOS
-- Android
-- macOS
-- Web (Chrome)
+```bash
+# Run tests
+flutter test
 
-## License
+# Run tests with coverage
+flutter test --coverage
 
-MIT
+# Analyze code
+flutter analyze
+
+# Deploy Cloud Functions
+cd functions && npm run deploy
+```
+
+## Documentation
+
+- [CLAUDE.md](./CLAUDE.md) - Detailed developer guide (architecture, patterns, setup)
+- [docs/cdr-research.md](./docs/cdr-research.md) - CDR/Open Banking research and business model notes
+- [docs/cdr-data-flow.mermaid](./docs/cdr-data-flow.mermaid) - Sequence diagram of CDR data flows
+
+## Security
+
+All sensitive data (transaction amounts, merchant names, notes) is encrypted client-side using AES-256-GCM before storage. Users set an encryption passphrase separate from their login credentials, with recovery codes for account recovery.
+
+See the "Client-Side Encryption" section in [CLAUDE.md](./CLAUDE.md) for details.
+
+## Roadmap
+
+- [ ] AI-powered transaction categorization (Gemini Flash)
+- [ ] Multi-bank PDF parsing support
+- [ ] Apple Sign-In
+- [ ] CDR/Open Banking integration via Basiq
+- [ ] Bill negotiation service

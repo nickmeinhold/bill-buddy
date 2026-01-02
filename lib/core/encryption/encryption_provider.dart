@@ -82,7 +82,7 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
       debugPrint('ENCRYPTION: Generated DEK');
 
       // Wrap DEK with password
-      final wrappedDEK = _encryptionService.wrapDEK(dek, password);
+      final wrappedDEK = await _encryptionService.wrapDEK(dek, password);
       debugPrint('ENCRYPTION: Wrapped DEK');
 
       // Generate recovery codes
@@ -102,10 +102,8 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
           .toList();
 
       // Also wrap DEK with first recovery code for recovery purposes
-      final recoveryWrappedDEK = _encryptionService.wrapDEKWithRecoveryCode(
-        dek,
-        recoveryCodes.first,
-      );
+      final recoveryWrappedDEK = await _encryptionService
+          .wrapDEKWithRecoveryCode(dek, recoveryCodes.first);
       debugPrint('ENCRYPTION: Wrapped DEK with recovery code');
 
       // Store in Firestore
@@ -171,7 +169,7 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
     final wrappedDEK = data['encryption']['wrappedDEK'] as String;
 
     try {
-      final dek = _encryptionService.unwrapDEK(wrappedDEK, password);
+      final dek = await _encryptionService.unwrapDEK(wrappedDEK, password);
 
       state = state.copyWith(
         dek: dek,
@@ -239,13 +237,13 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
       throw EncryptionNotInitializedException('No recovery backup found');
     }
 
-    final dek = _encryptionService.unwrapDEKWithRecoveryCode(
+    final dek = await _encryptionService.unwrapDEKWithRecoveryCode(
       recoveryWrappedDEK,
       recoveryCode,
     );
 
     // Re-wrap DEK with new password
-    final newWrappedDEK = _encryptionService.wrapDEK(dek, newPassword);
+    final newWrappedDEK = await _encryptionService.wrapDEK(dek, newPassword);
 
     // Mark recovery code as used
     recoveryCodes[matchingIndex]['used'] = true;
@@ -277,7 +275,7 @@ class EncryptionNotifier extends StateNotifier<EncryptionState> {
     final oldWrappedDEK = data['encryption']['wrappedDEK'] as String;
 
     // Re-wrap with new password
-    final newWrappedDEK = _encryptionService.rewrapDEK(
+    final newWrappedDEK = await _encryptionService.rewrapDEK(
       oldWrappedDEK,
       oldPassword,
       newPassword,

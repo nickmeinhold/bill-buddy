@@ -10,6 +10,7 @@ class StatementModel extends Equatable {
   final int? transactionCount;
   final String? errorMessage;
   final String storagePath;
+  final String? accountId;
 
   const StatementModel({
     required this.id,
@@ -19,6 +20,7 @@ class StatementModel extends Equatable {
     this.transactionCount,
     this.errorMessage,
     required this.storagePath,
+    this.accountId,
   });
 
   bool get isProcessing => status == StatementStatus.processing;
@@ -37,6 +39,7 @@ class StatementModel extends Equatable {
       transactionCount: map['transactionCount'] as int?,
       errorMessage: map['errorMessage'] as String?,
       storagePath: map['storagePath'] as String,
+      accountId: map['accountId'] as String?,
     );
   }
 
@@ -48,6 +51,7 @@ class StatementModel extends Equatable {
       'transactionCount': transactionCount,
       'errorMessage': errorMessage,
       'storagePath': storagePath,
+      'accountId': accountId,
     };
   }
 
@@ -59,6 +63,7 @@ class StatementModel extends Equatable {
     int? transactionCount,
     String? errorMessage,
     String? storagePath,
+    String? accountId,
   }) {
     return StatementModel(
       id: id ?? this.id,
@@ -68,6 +73,7 @@ class StatementModel extends Equatable {
       transactionCount: transactionCount ?? this.transactionCount,
       errorMessage: errorMessage ?? this.errorMessage,
       storagePath: storagePath ?? this.storagePath,
+      accountId: accountId ?? this.accountId,
     );
   }
 
@@ -80,5 +86,6 @@ class StatementModel extends Equatable {
     transactionCount,
     errorMessage,
     storagePath,
+    accountId,
   ];
 }

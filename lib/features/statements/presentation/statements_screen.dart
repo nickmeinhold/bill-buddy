@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../shared/models/account_model.dart';
+import '../../accounts/domain/accounts_provider.dart';
 import '../../../shared/models/statement_model.dart';
 import '../domain/statements_provider.dart';
 
@@ -18,6 +20,7 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ... code unchanged until _pickAndUploadFile ...
     final theme = Theme.of(context);
     final statementsAsync = ref.watch(statementsProvider);
 
@@ -107,12 +110,54 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
         return;
       }
 
+      // Check for available accounts
+      final accounts = await ref.read(accountsProvider.future);
+      String? accountId;
+
+      if (accounts.isNotEmpty && mounted) {
+        accountId = await showDialog<String>(
+          context: context,
+          builder: (context) => SimpleDialog(
+            title: const Text('Select Account'),
+            children: [
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, null),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text('Unassigned'),
+                ),
+              ),
+              ...accounts.map(
+                (acc) => SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, acc.id),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.account_balance,
+                          color: Color(acc.color),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(acc.name),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
       setState(() => _isUploading = true);
 
       final service = ref.read(statementServiceProvider);
       await service.uploadStatement(
         fileName: file.name,
         fileBytes: file.bytes!,
+        accountId: accountId,
       );
 
       if (mounted) {
