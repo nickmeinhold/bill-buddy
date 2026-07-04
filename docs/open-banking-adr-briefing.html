@@ -160,8 +160,7 @@
       <li><strong>"Open banking" in Australia = the Consumer Data Right (CDR)</strong>, regulated by the ACCC. To pull a person's bank data with their consent, you must either be an <strong>Accredited Data Recipient (ADR)</strong> or ride on top of someone who already is.</li>
       <li><strong>Becoming a full ADR is expensive and slow:</strong> roughly <strong>$30k–$300k upfront</strong> and <strong>6–12+ months</strong>, plus unavoidable annual costs (insurance, AFCA membership, security assessment) whether you build it yourself or outsource.</li>
       <li><strong>There are two much cheaper on-ramps:</strong> the <strong>CDR Representative</strong> model (2–4 months, ride under a principal's accreditation) and using an <strong>intermediary like Basiq</strong> (weeks, ~$0 upfront, pay per user). Most teams should start on an intermediary and only pursue full ADR once volume justifies it.</li>
-      <li><strong>The data flow is a standardised OAuth/consent handshake</strong> (see the diagram below): the user logs into their bank, grants consent, and data flows back to your backend over a secured connection. There is a legal duty to delete the data within 7 days of consent withdrawal.</li>
-      <li><strong>The market gap is real:</strong> no Australian app offers the full Rocket Money feature set (bill negotiation + automated subscription cancellation). Existing players (Frollo, WeMoney, PocketSmith) stop at budgeting.</li>
+      <li><strong>The data flow is a standardised OAuth/consent handshake</strong> (see the flow below): the user logs into their bank, grants consent, and data flows back to your backend over a secured connection. There is a legal duty to delete the data within 7 days of consent withdrawal.</li>
     </ul>
   </div>
 
@@ -172,13 +171,12 @@
       <li><a href="#paths">Routes to access &mdash; the core decision</a></li>
       <li><a href="#costs">The costs you cannot avoid</a></li>
       <li><a href="#flow">How the data flow works</a></li>
-      <li><a href="#opportunity">The market opportunity</a></li>
       <li><a href="#resources">Key resources &amp; links</a></li>
       <li><a href="#next">Open questions for a group considering ADR</a></li>
     </ol>
   </nav>
 
-  <p class="lead">This is the research we have gathered so far while building toward a personal-finance app on the CDR. It is written for a small group weighing up whether to pursue open-banking access together, possibly by becoming an ADR. Nothing here is legal advice; the cost figures are our best-estimate research and must be verified before anyone commits money.</p>
+  <p class="lead">This is the research we have gathered so far on accessing bank data under the CDR. It is written for a small group weighing up whether to pursue open-banking access together, possibly by becoming an ADR. Nothing here is legal advice; the cost figures are our best-estimate research and must be verified before anyone commits money.</p>
 
   <h2 id="what"><span class="num">1</span>What "open banking" actually is</h2>
   <p>Australia does not have a bank-run "open banking" API the way the UK does. Instead it has the <strong>Consumer Data Right (CDR)</strong>, a government framework (regulated by the ACCC, with data standards set by the Data Standards Body) that gives consumers the right to share their own data with accredited third parties.</p>
@@ -280,7 +278,7 @@ sequenceDiagram
     Note over App,ADR: Data Processing
     ADR->>ADR: Categorise (subscriptions, bills)
     ADR->>App: Processed data + insights
-    App->>User: "Found 12 subscriptions, $847/month"
+    App->>User: Categorised transactions + insights
 
     Note over ADR,Bank: Ongoing Refresh
     loop On-demand / periodic
@@ -300,34 +298,7 @@ sequenceDiagram
   </div>
   <p style="font-size:14.5px;color:var(--muted)">If the diagram above does not render (some offline email clients strip scripts), it is a sequence diagram; open the file in a browser to see it. The important beats: one-time accreditation, then per-user consent at the bank, secured token exchange, standardised data endpoints, and a legal 7-day deletion duty on withdrawal.</p>
 
-  <h2 id="opportunity"><span class="num">5</span>The market opportunity</h2>
-  <p>Why this is worth a group's time. Australia looks ripe for a Rocket Money style product:</p>
-  <ul>
-    <li>Australian households spend <strong>~$50/month on streaming alone</strong>, up 16% year on year.</li>
-    <li><strong>46%</strong> of users actively rotate between services to manage costs.</li>
-    <li><strong>39%</strong> plan to cancel at least one subscription in the next 12 months.</li>
-    <li><strong>3 in 10</strong> Australians lose up to <strong>$600/year</strong> on duplicate or unused services.</li>
-  </ul>
-  <div class="callout">
-    <span class="label">The gap</span>
-    <p>No Australian competitor offers Rocket Money's full feature set. Frollo, WeMoney and PocketSmith focus on budgeting. None offer bill negotiation or automated subscription cancellation.</p>
-  </div>
-
-  <details>
-    <summary>Competitor &amp; landscape snapshot</summary>
-    <table>
-      <thead><tr><th>Player</th><th>Consumer cost</th><th>Revenue model</th></tr></thead>
-      <tbody>
-        <tr><td>Frollo</td><td>Free</td><td>B2B white-label, data services</td></tr>
-        <tr><td>WeMoney</td><td>Free</td><td>Freemium, affiliate fees</td></tr>
-        <tr><td>Raiz</td><td>$4.50/month</td><td>Subscription + management fees</td></tr>
-        <tr><td>Basiq</td><td>N/A (B2B)</td><td>Per-user API fees</td></tr>
-        <tr><td>Banks (Westpac etc.)</td><td>Free</td><td>Customer retention</td></tr>
-      </tbody>
-    </table>
-  </details>
-
-  <h2 id="resources"><span class="num">6</span>Key resources &amp; links</h2>
+  <h2 id="resources"><span class="num">5</span>Key resources &amp; links</h2>
   <ul class="linklist">
     <li><a href="https://api.basiq.io/docs/guides">Basiq API documentation</a><span>The CDR-accredited intermediary. The fastest path to real bank data. Start here for a proof of concept.</span></li>
     <li><a href="https://cdrsandbox.gov.au/">CDR Sandbox</a><span>The government's testing environment. Try the consent flow and APIs without a real bank or accreditation.</span></li>
@@ -336,13 +307,13 @@ sequenceDiagram
     <li><a href="https://www.cdr.gov.au/">cdr.gov.au</a><span>The official CDR home for the accreditation process, rules and current participant register.</span></li>
   </ul>
 
-  <h2 id="next"><span class="num">7</span>Open questions for a group considering ADR</h2>
+  <h2 id="next"><span class="num">6</span>Open questions for a group considering ADR</h2>
   <p>If the group wants to go further than "use an intermediary," these are the questions worth answering together before spending money:</p>
   <ul>
     <li><strong>Do we even need to be an ADR?</strong> For most product ideas, an intermediary covers you indefinitely. The full ADR case is usually about margin at scale or owning the data relationship, not about capability.</li>
     <li><strong>Representative vs full accreditation?</strong> The CDR Representative model (ride under a principal ADR) is the middle path: faster and cheaper than full accreditation, more control than an intermediary. Worth pricing against both.</li>
     <li><strong>Who holds the security and insurance liability?</strong> Full accreditation puts the compliance, insurance and AFCA obligations on the group. That is a real ongoing cost and a real risk to structure deliberately.</li>
-    <li><strong>What is the actual product?</strong> Access is a means. The market gap (bill negotiation + subscription cancellation) is the most defensible wedge we have found, but the group should pick a wedge before optimising the access route.</li>
+    <li><strong>What is the actual product?</strong> Access is a means, not an end. The group should agree on what it is building before optimising the access route, since the product shapes which route, data scopes and consents you actually need.</li>
     <li><strong>Proof of concept first.</strong> The cheapest possible next step is a Basiq sandbox integration that pulls one real account's transactions. It de-risks everything downstream and costs almost nothing.</li>
   </ul>
 
@@ -351,7 +322,7 @@ sequenceDiagram
   </div>
 
   <footer>
-    <p>Prepared from Bill Buddy's CDR research notes. Share freely within the group. Questions or corrections welcome.</p>
+    <p>Prepared from our CDR access research. Share freely within the group. Questions or corrections welcome.</p>
   </footer>
 
 </div>
