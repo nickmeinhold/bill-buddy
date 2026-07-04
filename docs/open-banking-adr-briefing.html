@@ -173,7 +173,6 @@
       <li><a href="#costs">The costs you cannot avoid</a></li>
       <li><a href="#flow">How the data flow works</a></li>
       <li><a href="#opportunity">The market opportunity</a></li>
-      <li><a href="#model">One application: a Rocket Money for Australia</a></li>
       <li><a href="#resources">Key resources &amp; links</a></li>
       <li><a href="#next">Open questions for a group considering ADR</a></li>
     </ol>
@@ -328,20 +327,7 @@ sequenceDiagram
     </table>
   </details>
 
-  <h2 id="model"><span class="num">6</span>One application: a Rocket Money for Australia</h2>
-  <p>For context, here is the specific product we have been building toward (a personal-finance app, "Bill Buddy"). This is one way to monetise CDR access; a group might pursue the same or something entirely different. Included so you can see how the access maps to a business.</p>
-
-  <details>
-    <summary>Business model options we considered</summary>
-    <h3>Option A &mdash; Subscription + success fee (the Rocket Money model)</h3>
-    <p>Free tier (see subscriptions, get alerts); premium at $8/month (cancellation concierge, bill monitoring); negotiation at 40% of first-year savings.</p>
-    <h3>Option B &mdash; Pure affiliate</h3>
-    <p>Free app, revenue entirely from switches: energy switch $50–$200, internet switch $50–$100, insurance referral $30–$150.</p>
-    <h3>Option C &mdash; Hybrid (our current preference)</h3>
-    <p>Free tier (subscription tracking, bill comparison); premium at $6/month (cancellation service, priority support); negotiation at 35% of savings or a flat $25 per successful negotiation; switches via affiliate commission without charging the user.</p>
-  </details>
-
-  <h2 id="resources"><span class="num">7</span>Key resources &amp; links</h2>
+  <h2 id="resources"><span class="num">6</span>Key resources &amp; links</h2>
   <ul class="linklist">
     <li><a href="https://api.basiq.io/docs/guides">Basiq API documentation</a><span>The CDR-accredited intermediary. The fastest path to real bank data. Start here for a proof of concept.</span></li>
     <li><a href="https://cdrsandbox.gov.au/">CDR Sandbox</a><span>The government's testing environment. Try the consent flow and APIs without a real bank or accreditation.</span></li>
@@ -350,7 +336,7 @@ sequenceDiagram
     <li><a href="https://www.cdr.gov.au/">cdr.gov.au</a><span>The official CDR home for the accreditation process, rules and current participant register.</span></li>
   </ul>
 
-  <h2 id="next"><span class="num">8</span>Open questions for a group considering ADR</h2>
+  <h2 id="next"><span class="num">7</span>Open questions for a group considering ADR</h2>
   <p>If the group wants to go further than "use an intermediary," these are the questions worth answering together before spending money:</p>
   <ul>
     <li><strong>Do we even need to be an ADR?</strong> For most product ideas, an intermediary covers you indefinitely. The full ADR case is usually about margin at scale or owning the data relationship, not about capability.</li>
